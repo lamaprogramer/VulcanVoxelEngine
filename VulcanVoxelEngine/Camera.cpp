@@ -4,7 +4,7 @@
 Camera::Camera() {
 	Camera(nullptr, glm::vec3(0, 0, 2), 0, 0);
 }
-Camera::Camera(GLFWwindow* window, glm::vec3 position, int centerX, int centerY) {
+Camera::Camera(GLFWwindow* window, glm::vec3 position, float centerX, float centerY) {
 	this->position = position;
 
 	CameraKeybinds bindings{};
@@ -18,12 +18,6 @@ Camera::Camera(GLFWwindow* window, glm::vec3 position, int centerX, int centerY)
 	this->keybinds = bindings;
 	lastX = centerX;
 	lastY = centerY;
-
-	glm::vec3 direction;
-	direction.x = cos(glm::radians(-0.5)) * cos(glm::radians(-0.5));
-	direction.y = sin(glm::radians(-0.5));
-	direction.z = sin(glm::radians(-0.5)) * cos(glm::radians(-0.5));
-	cameraFront = glm::normalize(direction);
 }
 
 void Camera::update(GLFWwindow* window) {
@@ -84,7 +78,6 @@ void Camera::update(GLFWwindow* window) {
 	direction.y = sin(glm::radians(pitch));
 	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 	cameraFront = glm::normalize(direction);
-	std::cout << yaw << "\t" << pitch;
 }
 
 glm::vec3 Camera::getPosition() {

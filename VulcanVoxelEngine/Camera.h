@@ -13,7 +13,7 @@
 class Camera {
 public:
 	Camera();
-	Camera(GLFWwindow* window, glm::vec3 position, int centerX, int centerY);
+	Camera(GLFWwindow* window, glm::vec3 position, float centerX, float centerY);
 
 	void update(GLFWwindow* window);
 	glm::mat4 getViewMatrix();
@@ -31,6 +31,6 @@ private:
 	glm::vec3 cameraFront;
 	glm::vec3 cameraUp = glm::vec3(0.0, 1.0, 0.0);
 
-	float pitch;
-	float yaw;
+	float pitch = 0.0f;
+	float yaw = -90.0f;
 };
