@@ -76,7 +76,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;C:\Users\willk\libs\cpp\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -94,7 +94,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;C:\Users\willk\libs\cpp\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -112,7 +112,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;C:\Users\willk\libs\cpp\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -130,7 +130,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;C:\Users\willk\libs\cpp\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -143,11 +143,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BasicObject.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matricies.cpp" />
     <ClCompile Include="VulkanBufferUtil.cpp" />
     <ClCompile Include="VulkanCommandBuffers.cpp" />
+    <ClCompile Include="VulkanCommandBufferUtil.cpp" />
     <ClCompile Include="VulkanCommandPool.cpp" />
     <ClCompile Include="VulkanDebugMessenger.cpp" />
     <ClCompile Include="VulkanDescriptorPool.cpp" />
@@ -155,6 +157,7 @@
     <ClCompile Include="VulkanDescriptorSets.cpp" />
     <ClCompile Include="VulkanFrameBuffers.cpp" />
     <ClCompile Include="VulkanGraphicsPipeline.cpp" />
+    <ClCompile Include="VulkanImageUtil.cpp" />
     <ClCompile Include="VulkanImageViews.cpp" />
     <ClCompile Include="VulkanIndexBuffer.cpp" />
     <ClCompile Include="VulkanInstance.cpp" />
@@ -164,22 +167,26 @@
     <ClCompile Include="VulkanSurface.cpp" />
     <ClCompile Include="VulkanSwapChain.cpp" />
     <ClCompile Include="VulkanSyncObjects.cpp" />
+    <ClCompile Include="VulkanTextureImage.cpp" />
     <ClCompile Include="VulkanUniformBuffer.cpp" />
     <ClCompile Include="VulkanVertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="BasicObject.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraKeybinds.h" />
     <ClInclude Include="Matrices.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VulkanBufferUtil.h" />
     <ClInclude Include="VulkanCommandBuffers.h" />
+    <ClInclude Include="VulkanCommandBufferUtil.h" />
     <ClInclude Include="VulkanCommandPool.h" />
     <ClInclude Include="VulkanDescriptorPool.h" />
     <ClInclude Include="VulkanDescriptorSetLayout.h" />
     <ClInclude Include="VulkanDescriptorSets.h" />
     <ClInclude Include="VulkanFrameBuffers.h" />
     <ClInclude Include="VulkanGraphicsPipeline.h" />
+    <ClInclude Include="VulkanImageUtil.h" />
     <ClInclude Include="VulkanImageViews.h" />
     <ClInclude Include="VulkanIndexBuffer.h" />
     <ClInclude Include="VulkanLogicalDevice.h" />
@@ -190,6 +197,7 @@
     <ClInclude Include="VulkanSurface.h" />
     <ClInclude Include="VulkanSwapChain.h" />
     <ClInclude Include="VulkanSyncObjects.h" />
+    <ClInclude Include="VulkanTextureImage.h" />
     <ClInclude Include="VulkanUniformBuffer.h" />
     <ClInclude Include="VulkanVertexBuffer.h" />
   </ItemGroup>

@@ -1,31 +1,53 @@
 #include "VulkanUniformBuffer.h"
 
+
 VulkanUniformBuffer::VulkanUniformBuffer() {}
 VulkanUniformBuffer::VulkanUniformBuffer(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, int maxFramesInFlight) {
     VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+    createUniformBuffer(physicalDevice, device, bufferSize, maxFramesInFlight, uniformBuffers, uniformBuffersMemory, uniformBuffersMapped, uniformBufferInfo);
+    uniformSize = bufferSize;
+}
 
-    uniformBuffers.resize(maxFramesInFlight);
-    uniformBuffersMemory.resize(maxFramesInFlight);
-    uniformBuffersMapped.resize(maxFramesInFlight);
+VkDescriptorBufferInfo VulkanUniformBuffer::createDescriptorBufferInfo(VkBuffer buffer, size_t range = VK_WHOLE_SIZE) {
+    VkDescriptorBufferInfo bufferInfo{};
+    bufferInfo.buffer = buffer;
+    bufferInfo.offset = 0;
+    bufferInfo.range = range;
+    return bufferInfo;
+}
+
+void VulkanUniformBuffer::createUniformBuffer(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VkDeviceSize bufferSize, int maxFramesInFlight, std::vector<VkBuffer> &buffers, std::vector<VkDeviceMemory> &buffersMemory, std::vector<void*> &buffersMapped, VkDescriptorBufferInfo& bufferInfo) {
+
+    buffers.resize(maxFramesInFlight);
+    buffersMemory.resize(maxFramesInFlight);
+    buffersMapped.resize(maxFramesInFlight);
 
     for (size_t i = 0; i < maxFramesInFlight; i++) {
-        VulkanBufferUtil::createBuffer(physicalDevice, device, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
-
-        vkMapMemory(device.device, uniformBuffersMemory[i], 0, bufferSize, 0, &uniformBuffersMapped[i]);
+        VulkanBufferUtil::createBuffer(physicalDevice, device, bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, buffers[i], buffersMemory[i]);
+        bufferInfo = createDescriptorBufferInfo(buffers[i]);
+        vkMapMemory(device.device, buffersMemory[i], 0, bufferSize, 0, &buffersMapped[i]);
     }
 }
 
 void VulkanUniformBuffer::updateUniformBuffer(uint32_t currentImage, UniformBufferObject ubo) {
-    static auto startTime = std::chrono::high_resolution_clock::now();
-
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
-
-    //UniformBufferObject ubo{};
-    //ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    //ubo.view = glm::lookAt(glm::vec3(2.0f, 2.0f, 2.0f), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-    //ubo.proj = glm::perspective(glm::radians(45.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
-
     ubo.proj[1][1] *= -1;
     memcpy(uniformBuffersMapped[currentImage], &ubo, sizeof(ubo));
+}
+
+inline VkMappedMemoryRange VulkanUniformBuffer::mappedMemoryRange() {
+    VkMappedMemoryRange mappedMemoryRange{};
+    mappedMemoryRange.sType = VK_STRUCTURE_TYPE_MAPPED_MEMORY_RANGE;
+    return mappedMemoryRange;
+}
+
+void* VulkanUniformBuffer::alignedAlloc(size_t size, size_t alignment) {
+    void* data = nullptr;
+#if defined(_MSC_VER) || defined(__MINGW32__)
+    data = _aligned_malloc(size, alignment);
+#else
+    int res = posix_memalign(&data, alignment, size);
+    if (res != 0)
+        data = nullptr;
+#endif
+    return data;
 }

@@ -3,6 +3,8 @@
 #include "VulkanRenderPass.h"
 #include "VulkanDescriptorSetLayout.h"
 #include <fstream>
+#include "BasicObject.h"
+#include "Vertex.h"
 
 class VulkanGraphicsPipeline {
 public:

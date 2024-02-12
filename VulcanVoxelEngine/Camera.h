@@ -25,7 +25,7 @@ private:
 	float deltaTime = 0.0f;	// Time between current frame and last frame
 	float lastFrame = 0.0f;
 	float lastX, lastY;
-	bool firstMouse;
+	bool firstMouse = true;
 
 	glm::vec3 position;
 	glm::vec3 cameraFront;

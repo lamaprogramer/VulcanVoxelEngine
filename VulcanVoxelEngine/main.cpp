@@ -7,12 +7,15 @@
 #include "VulkanIndexBuffer.h"
 #include "VulkanUniformBuffer.h"
 #include "VulkanDescriptorSets.h"
+#include "VulkanTextureImage.h"
 
 #include "Vertex.h"
-#include "Matrices.h"
 #include "Camera.h"
+#include "BasicObject.h"
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtx/transform.hpp>
+
+using namespace std;
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -25,15 +28,19 @@ const std::vector<const char*> deviceExtensions = {
 };
 
 const std::vector<Vertex> vertices = {
-    {{-0.5f, -0.5f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f}, {0.0f, 1.0f, 0.0f}},
-    {{0.5f, 0.5f}, {0.0f, 0.0f, 1.0f}},
-    {{-0.5f, 0.5f}, {1.0f, 1.0f, 1.0f}}
+    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+    {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+    {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
+    {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}}
 };
 
 const std::vector<uint16_t> indices = {
     0, 1, 2, 2, 3, 0
 };
+
+const int MAX_OBJECTS = 50;
+std::vector<BasicObject> objectList{};
+
 
 
 #ifdef NDEBUG
@@ -69,6 +76,8 @@ private:
     VulkanFrameBuffers swapChainFramebuffers;
     VulkanCommandPool commandPool;
     VulkanIndexBuffer indexBuffer;
+
+    VulkanTextureImage textureImage;
     VulkanVertexBuffer vertexBuffer;
 
     VulkanUniformBuffer uniformBuffers;
@@ -116,11 +125,30 @@ private:
         graphicsPipeline =      VulkanGraphicsPipeline(device, renderPass, descriptorSetLayout);
         swapChainFramebuffers = VulkanFrameBuffers(device, swapChain, swapChainImageViews, renderPass);
         commandPool =           VulkanCommandPool(physicalDevice, device, surface);
-        vertexBuffer =          VulkanVertexBuffer(physicalDevice, device, commandPool, vertices);
+        textureImage =          VulkanTextureImage(physicalDevice, device, commandPool, "textures/texture.png");
+
+        vertexBuffer =          VulkanVertexBuffer(physicalDevice, device, commandPool, 1048576*40);
+
+        for (int i = 0; i < MAX_OBJECTS; i++) {
+            objectList.push_back(BasicObject(
+                physicalDevice,
+                device,
+                commandPool,
+                Matricies::createModelMatrix(glm::vec3(i*2, 0, 0), 0.5f, glm::radians(90.0), glm::vec3(0.0, 0.0, 1.0)),
+                vertices,
+                indices,
+                vertexBuffer
+            ));
+        }
+
         indexBuffer =           VulkanIndexBuffer(physicalDevice, device, commandPool, indices);
+
+
         uniformBuffers =        VulkanUniformBuffer(physicalDevice, device, MAX_FRAMES_IN_FLIGHT);
         descriptorPool =        VulkanDescriptorPool(device, MAX_FRAMES_IN_FLIGHT);
         descriptorSets =        VulkanDescriptorSets(device, uniformBuffers, descriptorPool, descriptorSetLayout, MAX_FRAMES_IN_FLIGHT);
+
+
         commandBuffers =        VulkanCommandBuffers(device, commandPool, MAX_FRAMES_IN_FLIGHT);
         syncObjects =           VulkanSyncObjects(device, MAX_FRAMES_IN_FLIGHT);
 
@@ -137,6 +165,9 @@ private:
 
     void cleanup() {
         cleanupSwapChain();
+
+        vkDestroyImage(device.device, textureImage.textureImage, nullptr);
+        vkFreeMemory(device.device, textureImage.textureImageMemory, nullptr);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroyBuffer(device.device, uniformBuffers.uniformBuffers[i], nullptr);
@@ -234,7 +265,7 @@ private:
         camera.update(window);
 
         UniformBufferObject ubo{};
-        ubo.model = Matricies::createModelMatrix(0.5f, glm::radians(90.0), glm::vec3(0.0, 0.0, 1.0));
+        ubo.model = Matricies::createModelMatrix(glm::vec3(0, 0, 0), 0.5f, glm::radians(90.0), glm::vec3(0.0, 0.0, 1.0));
         ubo.view = camera.getViewMatrix();
         ubo.proj = Matricies::createPerspectiveMatrix(glm::radians(45.0f), swapChain.swapChainExtent.width / (float)swapChain.swapChainExtent.height);
 
@@ -277,14 +308,7 @@ private:
     }
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
-        VkCommandBufferBeginInfo beginInfo{};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        beginInfo.flags = 0; // Optional
-        beginInfo.pInheritanceInfo = nullptr; // Optional
-
-        if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS) {
-            throw std::runtime_error("failed to begin recording command buffer!");
-        }
+        VkCommandBufferBeginInfo beginInfo = VulkanCommandBufferUtil::beginCommandBuffer(commandBuffer, 0);
 
         VkRenderPassBeginInfo renderPassInfo{};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
@@ -319,9 +343,13 @@ private:
         VkDeviceSize offsets[] = { 0 };
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
         vkCmdBindIndexBuffer(commandBuffer, indexBuffer.indexBuffer, 0, VK_INDEX_TYPE_UINT16);
-   
+
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.pipelineLayout, 0, 1, &descriptorSets.descriptorSets[currentFrame], 0, nullptr);
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+        
+        for (int i = 0; i < MAX_OBJECTS; i++) {
+            vkCmdPushConstants(commandBuffer, graphicsPipeline.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ModelMatrixObject), (void*)&objectList[i].matrix);
+            vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
+        }
 
         vkCmdEndRenderPass(commandBuffer);
 

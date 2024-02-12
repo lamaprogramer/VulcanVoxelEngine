@@ -7,4 +7,6 @@ public:
 
 	VulkanDescriptorPool();
 	VulkanDescriptorPool(VulkanLogicalDevice device, int maxFramesInFlight);
+
+	VkDescriptorPoolSize creatPoolSize(VkDescriptorType type, uint32_t descriptorCount);
 };

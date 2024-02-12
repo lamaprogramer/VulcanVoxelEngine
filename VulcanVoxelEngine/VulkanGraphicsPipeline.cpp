@@ -1,5 +1,4 @@
 #include "VulkanGraphicsPipeline.h"
-#include "Vertex.h"
 
 VulkanGraphicsPipeline::VulkanGraphicsPipeline() {}
 
@@ -45,7 +44,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, Vulka
     VkPipelineRasterizationStateCreateInfo rasterizer{};
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
-    rasterizer.polygonMode = VK_POLYGON_MODE_FILL;
+    rasterizer.polygonMode = VK_POLYGON_MODE_FILL; // VK_POLYGON_MODE_LINE for wireframe.
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
@@ -95,11 +94,21 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, Vulka
     viewportState.viewportCount = 1;
     viewportState.scissorCount = 1;
 
+    // Push Constant Range
+    VkPushConstantRange vpcr[1];
+    vpcr[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    vpcr[0].offset = 0;
+    vpcr[0].size = sizeof(ModelMatrixObject);
+
+
+
     // Pipeline layout
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout.descriptorSetLayout;
+    pipelineLayoutInfo.pushConstantRangeCount = 1;
+    pipelineLayoutInfo.pPushConstantRanges = vpcr;
 
     if (vkCreatePipelineLayout(device.device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");

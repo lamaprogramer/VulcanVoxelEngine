@@ -105,6 +105,18 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
+    <ClCompile Include="VulkanTextureImage.cpp">
+      <Filter>Source Files\vk</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanImageUtil.cpp">
+      <Filter>Source Files\vk\util</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanCommandBufferUtil.cpp">
+      <Filter>Source Files\vk\util</Filter>
+    </ClCompile>
+    <ClCompile Include="BasicObject.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VulkanInstance.h">
@@ -178,6 +190,18 @@
     </ClInclude>
     <ClInclude Include="CameraKeybinds.h">
       <Filter>Header Files\core\keybinds</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTextureImage.h">
+      <Filter>Header Files\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanImageUtil.h">
+      <Filter>Header Files\vk\util</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanCommandBufferUtil.h">
+      <Filter>Header Files\vk\util</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicObject.h">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

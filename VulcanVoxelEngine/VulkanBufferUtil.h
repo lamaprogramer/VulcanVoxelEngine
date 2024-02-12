@@ -1,5 +1,6 @@
 #pragma once
 #include "VulkanCommandPool.h"
+#include "VulkanCommandBufferUtil.h"
 #include "Vertex.h"
 
 class VulkanBufferUtil {

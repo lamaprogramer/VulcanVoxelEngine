@@ -7,4 +7,6 @@ public:
 
 	VulkanDescriptorSetLayout();
 	VulkanDescriptorSetLayout(VulkanLogicalDevice device);
+
+	VkDescriptorSetLayoutBinding createDescriptorSetLayoutBinding(VkDescriptorType type, VkShaderStageFlags flags, uint32_t binding);
 };

@@ -5,6 +5,6 @@
 
 class Matricies {
 public:
-	static glm::mat4 createModelMatrix(float scaleFactor, float angleInRadians, glm::vec3 rotationAxis);
+	static glm::mat4 createModelMatrix(glm::vec3 translation, float scaleFactor, float angleInRadians, glm::vec3 rotationAxis);
 	static glm::mat4 createPerspectiveMatrix(float fovInRadians, float aspectRatio);
 };
