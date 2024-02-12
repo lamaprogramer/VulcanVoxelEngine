@@ -34,6 +34,12 @@
     <Filter Include="Header Files\core\keybinds">
       <UniqueIdentifier>{e46a1f4f-060d-45aa-835f-fc4b29d46d7a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\vk\buffers">
+      <UniqueIdentifier>{d36c6edd-71ef-498f-9685-06c8789fbdeb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vk\buffers">
+      <UniqueIdentifier>{5181ff10-b125-4787-a445-bb84acfdde1b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -78,22 +84,13 @@
     <ClCompile Include="VulkanSyncObjects.cpp">
       <Filter>Source Files\vk</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanVertexBuffer.cpp">
-      <Filter>Source Files\vk</Filter>
-    </ClCompile>
     <ClCompile Include="Matricies.cpp">
       <Filter>Source Files\core</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanIndexBuffer.cpp">
-      <Filter>Source Files\vk</Filter>
     </ClCompile>
     <ClCompile Include="VulkanBufferUtil.cpp">
       <Filter>Source Files\vk\util</Filter>
     </ClCompile>
     <ClCompile Include="VulkanDescriptorSetLayout.cpp">
-      <Filter>Source Files\vk</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanUniformBuffer.cpp">
       <Filter>Source Files\vk</Filter>
     </ClCompile>
     <ClCompile Include="VulkanDescriptorPool.cpp">
@@ -116,6 +113,18 @@
     </ClCompile>
     <ClCompile Include="BasicObject.cpp">
       <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanBuffer.cpp">
+      <Filter>Source Files\vk\buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanVertexBuffer.cpp">
+      <Filter>Source Files\vk\buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanUniformBuffer.cpp">
+      <Filter>Source Files\vk\buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanIndexBuffer.cpp">
+      <Filter>Source Files\vk\buffers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -161,22 +170,13 @@
     <ClInclude Include="Vertex.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanVertexBuffer.h">
-      <Filter>Header Files\vk</Filter>
-    </ClInclude>
     <ClInclude Include="Matrices.h">
       <Filter>Header Files\core</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanIndexBuffer.h">
-      <Filter>Header Files\vk</Filter>
     </ClInclude>
     <ClInclude Include="VulkanBufferUtil.h">
       <Filter>Header Files\vk\util</Filter>
     </ClInclude>
     <ClInclude Include="VulkanDescriptorSetLayout.h">
-      <Filter>Header Files\vk</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanUniformBuffer.h">
       <Filter>Header Files\vk</Filter>
     </ClInclude>
     <ClInclude Include="VulkanDescriptorPool.h">
@@ -202,6 +202,18 @@
     </ClInclude>
     <ClInclude Include="BasicObject.h">
       <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanBuffer.h">
+      <Filter>Header Files\vk\buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanVertexBuffer.h">
+      <Filter>Header Files\vk\buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanUniformBuffer.h">
+      <Filter>Header Files\vk\buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanIndexBuffer.h">
+      <Filter>Header Files\vk\buffers</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -147,6 +147,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matricies.cpp" />
+    <ClCompile Include="VulkanBuffer.cpp" />
     <ClCompile Include="VulkanBufferUtil.cpp" />
     <ClCompile Include="VulkanCommandBuffers.cpp" />
     <ClCompile Include="VulkanCommandBufferUtil.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="CameraKeybinds.h" />
     <ClInclude Include="Matrices.h" />
     <ClInclude Include="Vertex.h" />
+    <ClInclude Include="VulkanBuffer.h" />
     <ClInclude Include="VulkanBufferUtil.h" />
     <ClInclude Include="VulkanCommandBuffers.h" />
     <ClInclude Include="VulkanCommandBufferUtil.h" />

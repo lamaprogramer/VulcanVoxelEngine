@@ -1,15 +1,15 @@
 #include "VulkanDescriptorSets.h"
 
 VulkanDescriptorSets::VulkanDescriptorSets() {}
-VulkanDescriptorSets::VulkanDescriptorSets(VulkanLogicalDevice device, VulkanUniformBuffer uniformBuffers, VulkanDescriptorPool descriptorPool, VulkanDescriptorSetLayout descriptorSetLayout, int maxFramesInFlight) {
+VulkanDescriptorSets::VulkanDescriptorSets(VulkanLogicalDevice device, std::vector<VulkanUniformBuffer> uniformBuffers, VulkanDescriptorPool descriptorPool, VulkanDescriptorSetLayout descriptorSetLayout, int maxFramesInFlight) {
 	std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, descriptorSetLayout.descriptorSetLayout);
 	allocateDescriptorSets(device, descriptorPool, layouts, descriptorSets, maxFramesInFlight);
 
 	for (size_t i = 0; i < maxFramesInFlight; i++) {
-		VkDescriptorBufferInfo bufferInfo = createDescriptorBufferInfo(uniformBuffers.uniformBuffers[i]);
+		VkDescriptorBufferInfo bufferInfo = createDescriptorBufferInfo(uniformBuffers[i].buffer);
 
 		std::vector< VkWriteDescriptorSet> descriptorWrites = {
-			writeDescriptorSet(descriptorSets[i], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, uniformBuffers.uniformBufferInfo),
+			writeDescriptorSet(descriptorSets[i], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, uniformBuffers[i].bufferInfo),
 		};
 		//VkWriteDescriptorSet descriptorWrite = writeDescriptorSet(descriptorSets[i], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, bufferInfo);
 

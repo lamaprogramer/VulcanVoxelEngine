@@ -80,7 +80,7 @@ private:
     VulkanTextureImage textureImage;
     VulkanVertexBuffer vertexBuffer;
 
-    VulkanUniformBuffer uniformBuffers;
+    std::vector<VulkanUniformBuffer> uniformBuffers;
     VulkanDescriptorPool descriptorPool;
     VulkanDescriptorSets descriptorSets;
 
@@ -126,7 +126,6 @@ private:
         swapChainFramebuffers = VulkanFrameBuffers(device, swapChain, swapChainImageViews, renderPass);
         commandPool =           VulkanCommandPool(physicalDevice, device, surface);
         textureImage =          VulkanTextureImage(physicalDevice, device, commandPool, "textures/texture.png");
-
         vertexBuffer =          VulkanVertexBuffer(physicalDevice, device, commandPool, 1048576*40);
 
         for (int i = 0; i < MAX_OBJECTS; i++) {
@@ -143,11 +142,14 @@ private:
 
         indexBuffer =           VulkanIndexBuffer(physicalDevice, device, commandPool, indices);
 
+        uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
+        for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
+            VulkanUniformBuffer buffer = VulkanUniformBuffer(physicalDevice, device);
+            uniformBuffers[i] = buffer;
+        }
 
-        uniformBuffers =        VulkanUniformBuffer(physicalDevice, device, MAX_FRAMES_IN_FLIGHT);
         descriptorPool =        VulkanDescriptorPool(device, MAX_FRAMES_IN_FLIGHT);
         descriptorSets =        VulkanDescriptorSets(device, uniformBuffers, descriptorPool, descriptorSetLayout, MAX_FRAMES_IN_FLIGHT);
-
 
         commandBuffers =        VulkanCommandBuffers(device, commandPool, MAX_FRAMES_IN_FLIGHT);
         syncObjects =           VulkanSyncObjects(device, MAX_FRAMES_IN_FLIGHT);
@@ -170,17 +172,17 @@ private:
         vkFreeMemory(device.device, textureImage.textureImageMemory, nullptr);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-            vkDestroyBuffer(device.device, uniformBuffers.uniformBuffers[i], nullptr);
-            vkFreeMemory(device.device, uniformBuffers.uniformBuffersMemory[i], nullptr);
+            vkDestroyBuffer(device.device, uniformBuffers[i].buffer, nullptr);
+            vkFreeMemory(device.device, uniformBuffers[i].bufferMemory, nullptr);
         }
         vkDestroyDescriptorPool(device.device, descriptorPool.descriptorPool, nullptr);
         vkDestroyDescriptorSetLayout(device.device, descriptorSetLayout.descriptorSetLayout, nullptr);
-        vkDestroyBuffer(device.device, indexBuffer.indexBuffer, nullptr);
+        vkDestroyBuffer(device.device, indexBuffer.buffer, nullptr);
 
-        vkFreeMemory(device.device, indexBuffer.indexBufferMemory, nullptr);
+        vkFreeMemory(device.device, indexBuffer.bufferMemory, nullptr);
 
-        vkDestroyBuffer(device.device, vertexBuffer.vertexBuffer, nullptr);
-        vkFreeMemory(device.device, vertexBuffer.vertexBufferMemory, nullptr);
+        vkDestroyBuffer(device.device, vertexBuffer.buffer, nullptr);
+        vkFreeMemory(device.device, vertexBuffer.bufferMemory, nullptr);
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(device.device, syncObjects.renderFinishedSemaphores[i], nullptr);
             vkDestroySemaphore(device.device, syncObjects.imageAvailableSemaphores[i], nullptr);
@@ -270,7 +272,7 @@ private:
         ubo.proj = Matricies::createPerspectiveMatrix(glm::radians(45.0f), swapChain.swapChainExtent.width / (float)swapChain.swapChainExtent.height);
 
 
-        uniformBuffers.updateUniformBuffer(currentFrame, ubo);
+        uniformBuffers[currentFrame].updateUniformBuffer(ubo);
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -339,10 +341,10 @@ private:
         scissor.extent = swapChain.swapChainExtent;
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-        VkBuffer vertexBuffers[] = { vertexBuffer.vertexBuffer };
+        VkBuffer vertexBuffers[] = { vertexBuffer.buffer };
         VkDeviceSize offsets[] = { 0 };
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-        vkCmdBindIndexBuffer(commandBuffer, indexBuffer.indexBuffer, 0, VK_INDEX_TYPE_UINT16);
+        vkCmdBindIndexBuffer(commandBuffer, indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
 
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.pipelineLayout, 0, 1, &descriptorSets.descriptorSets[currentFrame], 0, nullptr);
         

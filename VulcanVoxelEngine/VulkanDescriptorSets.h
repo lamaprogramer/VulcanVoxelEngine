@@ -8,7 +8,7 @@ public:
 	std::vector<VkDescriptorSet> descriptorSets;
 
 	VulkanDescriptorSets();
-	VulkanDescriptorSets(VulkanLogicalDevice device, VulkanUniformBuffer uniformBuffers, VulkanDescriptorPool descriptorPool, VulkanDescriptorSetLayout descriptorSetLayout, int maxFramesInFlight);
+	VulkanDescriptorSets(VulkanLogicalDevice device, std::vector<VulkanUniformBuffer> uniformBuffers, VulkanDescriptorPool descriptorPool, VulkanDescriptorSetLayout descriptorSetLayout, int maxFramesInFlight);
 
 	void allocateDescriptorSets(VulkanLogicalDevice device, VulkanDescriptorPool descriptorPool, std::vector<VkDescriptorSetLayout> layouts, std::vector<VkDescriptorSet> &descriptorSets, uint32_t descriptorCount);
 	VkDescriptorBufferInfo createDescriptorBufferInfo(VkBuffer buffer);

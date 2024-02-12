@@ -1,12 +1,9 @@
 #pragma once
-#include "VulkanBufferUtil.h"
+#include "VulkanBuffer.h"
 #include "Vertex.h"
 
-class VulkanVertexBuffer {
+class VulkanVertexBuffer: public VulkanBuffer {
 public:
-	VkBuffer vertexBuffer;
-	VkDeviceMemory vertexBufferMemory;
-	VkDeviceSize bufferSize;
 	VkDeviceSize bufferOffset = 0;
 
 	VulkanVertexBuffer();
