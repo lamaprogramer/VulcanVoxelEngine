@@ -40,6 +40,12 @@
     <Filter Include="Source Files\vk\buffers">
       <UniqueIdentifier>{5181ff10-b125-4787-a445-bb84acfdde1b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\vk\images">
+      <UniqueIdentifier>{1cdb60ee-3270-4230-a941-25666febb541}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vk\images">
+      <UniqueIdentifier>{77db9812-17fe-4fb5-9fab-ef96516e3b6c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -102,9 +108,6 @@
     <ClCompile Include="Camera.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanTextureImage.cpp">
-      <Filter>Source Files\vk</Filter>
-    </ClCompile>
     <ClCompile Include="VulkanImageUtil.cpp">
       <Filter>Source Files\vk\util</Filter>
     </ClCompile>
@@ -125,6 +128,12 @@
     </ClCompile>
     <ClCompile Include="VulkanIndexBuffer.cpp">
       <Filter>Source Files\vk\buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanImage.cpp">
+      <Filter>Source Files\vk\images</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanTextureImage.cpp">
+      <Filter>Source Files\vk\images</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -191,9 +200,6 @@
     <ClInclude Include="CameraKeybinds.h">
       <Filter>Header Files\core\keybinds</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanTextureImage.h">
-      <Filter>Header Files\vk</Filter>
-    </ClInclude>
     <ClInclude Include="VulkanImageUtil.h">
       <Filter>Header Files\vk\util</Filter>
     </ClInclude>
@@ -214,6 +220,12 @@
     </ClInclude>
     <ClInclude Include="VulkanIndexBuffer.h">
       <Filter>Header Files\vk\buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanImage.h">
+      <Filter>Header Files\vk\images</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanTextureImage.h">
+      <Filter>Header Files\vk\images</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -15,6 +15,9 @@
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtx/transform.hpp>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
+
 using namespace std;
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
@@ -119,13 +122,18 @@ private:
         physicalDevice =        VulkanPhysicalDevice(instance, surface, deviceExtensions);
         device =                VulkanLogicalDevice(physicalDevice, surface, deviceExtensions, validationLayers, enableValidationLayers);
         swapChain =             VulkanSwapChain(physicalDevice, device, surface, window);
+        camera =                Camera(window, glm::vec3(0, 0, 2), swapChain.swapChainExtent.width / 2, swapChain.swapChainExtent.height / 2);
         swapChainImageViews =   VulkanImageViews(device, swapChain);
         renderPass =            VulkanRenderPass(device, swapChain);
         descriptorSetLayout =   VulkanDescriptorSetLayout(device);
         graphicsPipeline =      VulkanGraphicsPipeline(device, renderPass, descriptorSetLayout);
         swapChainFramebuffers = VulkanFrameBuffers(device, swapChain, swapChainImageViews, renderPass);
         commandPool =           VulkanCommandPool(physicalDevice, device, surface);
-        textureImage =          VulkanTextureImage(physicalDevice, device, commandPool, "textures/texture.png");
+
+        const char* path = "textures/texture.png";
+        ImageData imageData{};
+        imageData.pixels = stbi_load(path, &imageData.texWidth, &imageData.texHeight, &imageData.texChannels, STBI_rgb_alpha);
+        textureImage =          VulkanTextureImage(physicalDevice, device, commandPool, imageData);
         vertexBuffer =          VulkanVertexBuffer(physicalDevice, device, commandPool, 1048576*40);
 
         for (int i = 0; i < MAX_OBJECTS; i++) {
@@ -133,7 +141,7 @@ private:
                 physicalDevice,
                 device,
                 commandPool,
-                Matricies::createModelMatrix(glm::vec3(i*2, 0, 0), 0.5f, glm::radians(90.0), glm::vec3(0.0, 0.0, 1.0)),
+                Matricies::createModelMatrix(glm::vec3(i*2, 0, -i*2), 0.5f, glm::radians(90.0), glm::vec3(0.0, 0.0, 1.0)),
                 vertices,
                 indices,
                 vertexBuffer
@@ -153,8 +161,6 @@ private:
 
         commandBuffers =        VulkanCommandBuffers(device, commandPool, MAX_FRAMES_IN_FLIGHT);
         syncObjects =           VulkanSyncObjects(device, MAX_FRAMES_IN_FLIGHT);
-
-        camera = Camera(window, glm::vec3(0, 0, 2), swapChain.swapChainExtent.width/2, swapChain.swapChainExtent.height/2);
     }
 
     void mainLoop() {
@@ -168,8 +174,8 @@ private:
     void cleanup() {
         cleanupSwapChain();
 
-        vkDestroyImage(device.device, textureImage.textureImage, nullptr);
-        vkFreeMemory(device.device, textureImage.textureImageMemory, nullptr);
+        vkDestroyImage(device.device, textureImage.image, nullptr);
+        vkFreeMemory(device.device, textureImage.imageMemory, nullptr);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroyBuffer(device.device, uniformBuffers[i].buffer, nullptr);

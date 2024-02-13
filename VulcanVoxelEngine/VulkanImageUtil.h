@@ -1,5 +1,5 @@
 #pragma once
-#include "VulkanBufferUtil.h"
+#include "VulkanBuffer.h"
 
 class VulkanImageUtil {
 public:

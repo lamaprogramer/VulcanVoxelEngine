@@ -158,6 +158,7 @@
     <ClCompile Include="VulkanDescriptorSets.cpp" />
     <ClCompile Include="VulkanFrameBuffers.cpp" />
     <ClCompile Include="VulkanGraphicsPipeline.cpp" />
+    <ClCompile Include="VulkanImage.cpp" />
     <ClCompile Include="VulkanImageUtil.cpp" />
     <ClCompile Include="VulkanImageViews.cpp" />
     <ClCompile Include="VulkanIndexBuffer.cpp" />
@@ -188,6 +189,7 @@
     <ClInclude Include="VulkanDescriptorSets.h" />
     <ClInclude Include="VulkanFrameBuffers.h" />
     <ClInclude Include="VulkanGraphicsPipeline.h" />
+    <ClInclude Include="VulkanImage.h" />
     <ClInclude Include="VulkanImageUtil.h" />
     <ClInclude Include="VulkanImageViews.h" />
     <ClInclude Include="VulkanIndexBuffer.h" />

@@ -1,6 +1,8 @@
-#include "VulkanImageUtil.h"
+#include "VulkanImage.h"
+#define STB_IMAGE_IMPLEMENTATION
 
-void VulkanImageUtil::createImage(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
+VulkanImage::VulkanImage() {}
+VulkanImage::VulkanImage(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, uint32_t width, uint32_t height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties) {
     VkImageCreateInfo imageInfo{};
     imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
     imageInfo.imageType = VK_IMAGE_TYPE_2D;
