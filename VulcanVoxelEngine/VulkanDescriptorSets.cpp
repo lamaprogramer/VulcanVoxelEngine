@@ -1,17 +1,20 @@
 #include "VulkanDescriptorSets.h"
 
 VulkanDescriptorSets::VulkanDescriptorSets() {}
-VulkanDescriptorSets::VulkanDescriptorSets(VulkanLogicalDevice device, std::vector<VulkanUniformBuffer> uniformBuffers, VulkanDescriptorPool descriptorPool, VulkanDescriptorSetLayout descriptorSetLayout, int maxFramesInFlight) {
+VulkanDescriptorSets::VulkanDescriptorSets(VulkanLogicalDevice device, std::vector<VulkanUniformBuffer> uniformBuffers, VulkanDescriptorPool descriptorPool, VulkanDescriptorSetLayout descriptorSetLayout, VulkanImageView textureImageView, VulkanImageSampler textureSampler,  int maxFramesInFlight) {
 	std::vector<VkDescriptorSetLayout> layouts(maxFramesInFlight, descriptorSetLayout.descriptorSetLayout);
 	allocateDescriptorSets(device, descriptorPool, layouts, descriptorSets, maxFramesInFlight);
 
 	for (size_t i = 0; i < maxFramesInFlight; i++) {
-		VkDescriptorBufferInfo bufferInfo = createDescriptorBufferInfo(uniformBuffers[i].buffer);
+		VkDescriptorImageInfo imageInfo{};
+		imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+		imageInfo.imageView = textureImageView.textureImageView;
+		imageInfo.sampler = textureSampler.textureSampler;
 
-		std::vector< VkWriteDescriptorSet> descriptorWrites = {
+		std::vector<VkWriteDescriptorSet> descriptorWrites = {
 			writeDescriptorSet(descriptorSets[i], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, uniformBuffers[i].bufferInfo),
+			writeDescriptorSet(descriptorSets[i], VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1, imageInfo)
 		};
-		//VkWriteDescriptorSet descriptorWrite = writeDescriptorSet(descriptorSets[i], VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 0, bufferInfo);
 
 		vkUpdateDescriptorSets(device.device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 	}
@@ -49,7 +52,21 @@ VkWriteDescriptorSet VulkanDescriptorSets::writeDescriptorSet(VkDescriptorSet de
 	descriptorWrite.descriptorCount = 1;
 
 	descriptorWrite.pBufferInfo = &info;
-	descriptorWrite.pImageInfo = nullptr; // Optional
+	descriptorWrite.pTexelBufferView = nullptr; // Optional
+	return descriptorWrite;
+}
+
+VkWriteDescriptorSet VulkanDescriptorSets::writeDescriptorSet(VkDescriptorSet descriptorSet, VkDescriptorType type, uint32_t binding, VkDescriptorImageInfo info) {
+	VkWriteDescriptorSet descriptorWrite{};
+	descriptorWrite.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+	descriptorWrite.dstSet = descriptorSet;
+	descriptorWrite.dstBinding = binding;
+	descriptorWrite.dstArrayElement = 0;
+
+	descriptorWrite.descriptorType = type;
+	descriptorWrite.descriptorCount = 1;
+
+	descriptorWrite.pImageInfo = &info;
 	descriptorWrite.pTexelBufferView = nullptr; // Optional
 	return descriptorWrite;
 }

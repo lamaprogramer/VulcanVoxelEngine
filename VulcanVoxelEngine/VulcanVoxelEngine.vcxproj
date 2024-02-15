@@ -145,10 +145,12 @@
   <ItemGroup>
     <ClCompile Include="BasicObject.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CubeMap.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matricies.cpp" />
+    <ClCompile Include="VulkanImageSampler.cpp" />
+    <ClCompile Include="VulkanImageView.cpp" />
     <ClCompile Include="VulkanBuffer.cpp" />
-    <ClCompile Include="VulkanBufferUtil.cpp" />
     <ClCompile Include="VulkanCommandBuffers.cpp" />
     <ClCompile Include="VulkanCommandBufferUtil.cpp" />
     <ClCompile Include="VulkanCommandPool.cpp" />
@@ -177,10 +179,12 @@
     <ClInclude Include="BasicObject.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraKeybinds.h" />
+    <ClInclude Include="CubeMap.h" />
     <ClInclude Include="Matrices.h" />
+    <ClInclude Include="VulkanImageSampler.h" />
+    <ClInclude Include="VulkanImageView.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="VulkanBuffer.h" />
-    <ClInclude Include="VulkanBufferUtil.h" />
     <ClInclude Include="VulkanCommandBuffers.h" />
     <ClInclude Include="VulkanCommandBufferUtil.h" />
     <ClInclude Include="VulkanCommandPool.h" />

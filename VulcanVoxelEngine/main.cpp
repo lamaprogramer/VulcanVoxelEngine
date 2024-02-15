@@ -8,6 +8,9 @@
 #include "VulkanUniformBuffer.h"
 #include "VulkanDescriptorSets.h"
 #include "VulkanTextureImage.h"
+#include "VulkanImageView.h"
+#include "VulkanImageSampler.h"
+#include "CubeMap.h"
 
 #include "Vertex.h"
 #include "Camera.h"
@@ -31,14 +34,19 @@ const std::vector<const char*> deviceExtensions = {
 };
 
 const std::vector<Vertex> vertices = {
-    {{-0.5f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-    {{0.5f, -0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-    {{0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}},
-    {{-0.5f, 0.5f, 0.0f}, {1.0f, 1.0f, 1.0f}}
+    {{-1.0f, -1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // 0
+    {{1.0f, -1.0f,  1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}, // 1
+    {{1.0f,  1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}}, // 2
+    {{-1.0f,  1.0f,  1.0f}, { 1.0f, 0.0f, 0.0f }, {0.0f, 0.0f}}, // 3
+
+    {{-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f} }, // 4
+    {{1.0f, -1.0f, -1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f} }, // 5
+    {{1.0f,  1.0f, -1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f} }, // 6
+    {{-1.0f,  1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f} } // 7
 };
 
 const std::vector<uint16_t> indices = {
-    0, 1, 2, 2, 3, 0
+        0,1,2, 2,3,0, 1,5,6, 6,2,1, 7,6,5, 5,4,7, 4,0,3, 3,7,4, 4,5,1, 1,0,4, 3,2,6, 6,7,3,
 };
 
 const int MAX_OBJECTS = 50;
@@ -81,6 +89,10 @@ private:
     VulkanIndexBuffer indexBuffer;
 
     VulkanTextureImage textureImage;
+    CubeMap cubeMap;
+    VulkanImageView textureImageView;
+    VulkanImageSampler textureSampler;
+
     VulkanVertexBuffer vertexBuffer;
 
     std::vector<VulkanUniformBuffer> uniformBuffers;
@@ -131,9 +143,20 @@ private:
         commandPool =           VulkanCommandPool(physicalDevice, device, surface);
 
         const char* path = "textures/texture.png";
-        ImageData imageData{};
-        imageData.pixels = stbi_load(path, &imageData.texWidth, &imageData.texHeight, &imageData.texChannels, STBI_rgb_alpha);
-        textureImage =          VulkanTextureImage(physicalDevice, device, commandPool, imageData);
+        CubeMapData cubeMapData{};
+
+        for (int i = 0; i < 6; i++) {
+            cubeMapData.pixels[i] = stbi_load(path, &cubeMapData.texWidth, &cubeMapData.texHeight, &cubeMapData.texChannels, STBI_rgb_alpha);
+        }
+        cubeMap = CubeMap(physicalDevice, device, commandPool, cubeMapData);
+
+        //ImageData imageData{};
+        //imageData.pixels = stbi_load(path, &imageData.texWidth, &imageData.texHeight, &imageData.texChannels, STBI_rgb_alpha);
+
+        //textureImage =          VulkanTextureImage(physicalDevice, device, commandPool, imageData);
+        //textureImageView =      VulkanImageView(device, textureImage, 1, VK_IMAGE_VIEW_TYPE_2D, VK_FORMAT_R8G8B8A8_SRGB);
+        textureImageView =      VulkanImageView(device, cubeMap, 6, VK_IMAGE_VIEW_TYPE_CUBE, VK_FORMAT_R8G8B8A8_SRGB);
+        textureSampler =        VulkanImageSampler(physicalDevice, device);
         vertexBuffer =          VulkanVertexBuffer(physicalDevice, device, commandPool, 1048576*40);
 
         for (int i = 0; i < MAX_OBJECTS; i++) {
@@ -157,7 +180,7 @@ private:
         }
 
         descriptorPool =        VulkanDescriptorPool(device, MAX_FRAMES_IN_FLIGHT);
-        descriptorSets =        VulkanDescriptorSets(device, uniformBuffers, descriptorPool, descriptorSetLayout, MAX_FRAMES_IN_FLIGHT);
+        descriptorSets =        VulkanDescriptorSets(device, uniformBuffers, descriptorPool, descriptorSetLayout, textureImageView, textureSampler, MAX_FRAMES_IN_FLIGHT);
 
         commandBuffers =        VulkanCommandBuffers(device, commandPool, MAX_FRAMES_IN_FLIGHT);
         syncObjects =           VulkanSyncObjects(device, MAX_FRAMES_IN_FLIGHT);
@@ -174,7 +197,11 @@ private:
     void cleanup() {
         cleanupSwapChain();
 
-        vkDestroyImage(device.device, textureImage.image, nullptr);
+        vkDestroyImageView(device.device, textureImageView.textureImageView, nullptr);
+
+        vkDestroySampler(device.device, textureSampler.textureSampler, nullptr);
+        //vkDestroyImage(device.device, textureImage.image, nullptr);
+        vkDestroyImage(device.device, cubeMap.image, nullptr);
         vkFreeMemory(device.device, textureImage.imageMemory, nullptr);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {

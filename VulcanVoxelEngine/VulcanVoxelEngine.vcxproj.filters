@@ -93,9 +93,6 @@
     <ClCompile Include="Matricies.cpp">
       <Filter>Source Files\core</Filter>
     </ClCompile>
-    <ClCompile Include="VulkanBufferUtil.cpp">
-      <Filter>Source Files\vk\util</Filter>
-    </ClCompile>
     <ClCompile Include="VulkanDescriptorSetLayout.cpp">
       <Filter>Source Files\vk</Filter>
     </ClCompile>
@@ -133,6 +130,15 @@
       <Filter>Source Files\vk\images</Filter>
     </ClCompile>
     <ClCompile Include="VulkanTextureImage.cpp">
+      <Filter>Source Files\vk\images</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanImageView.cpp">
+      <Filter>Source Files\vk</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanImageSampler.cpp">
+      <Filter>Source Files\vk</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeMap.cpp">
       <Filter>Source Files\vk\images</Filter>
     </ClCompile>
   </ItemGroup>
@@ -182,9 +188,6 @@
     <ClInclude Include="Matrices.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
-    <ClInclude Include="VulkanBufferUtil.h">
-      <Filter>Header Files\vk\util</Filter>
-    </ClInclude>
     <ClInclude Include="VulkanDescriptorSetLayout.h">
       <Filter>Header Files\vk</Filter>
     </ClInclude>
@@ -225,6 +228,15 @@
       <Filter>Header Files\vk\images</Filter>
     </ClInclude>
     <ClInclude Include="VulkanTextureImage.h">
+      <Filter>Header Files\vk\images</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanImageView.h">
+      <Filter>Header Files\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanImageSampler.h">
+      <Filter>Header Files\vk</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeMap.h">
       <Filter>Header Files\vk\images</Filter>
     </ClInclude>
   </ItemGroup>

@@ -5,7 +5,7 @@ VulkanDescriptorPool::VulkanDescriptorPool(VulkanLogicalDevice device, int maxFr
 
 	std::vector<VkDescriptorPoolSize> poolSizes = {
 			creatPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, static_cast<uint32_t>(maxFramesInFlight)),
-			creatPoolSize(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER_DYNAMIC, static_cast<uint32_t>(maxFramesInFlight)),
+			creatPoolSize(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, static_cast<uint32_t>(maxFramesInFlight))
 	};
 
 	VkDescriptorPoolCreateInfo poolInfo{};

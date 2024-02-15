@@ -4,7 +4,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline() {}
 
 VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, VulkanRenderPass renderPass, VulkanDescriptorSetLayout descriptorSetLayout) {
     auto vertShaderCode = readFile("shaders/vert.spv");
-    auto fragShaderCode = readFile("shaders/frag.spv");
+    auto fragShaderCode = readFile("shaders/cube.spv");
 
     VkShaderModule vertShaderModule = createShaderModule(device.device, vertShaderCode);
     VkShaderModule fragShaderModule = createShaderModule(device.device, fragShaderCode);
