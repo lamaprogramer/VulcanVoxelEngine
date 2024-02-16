@@ -10,7 +10,7 @@
 #include "VulkanTextureImage.h"
 #include "VulkanImageView.h"
 #include "VulkanImageSampler.h"
-#include "CubeMap.h"
+#include "VulkanCubeMapImage.h"
 
 #include "Vertex.h"
 #include "Camera.h"
@@ -86,10 +86,14 @@ private:
     VulkanGraphicsPipeline graphicsPipeline;
     VulkanFrameBuffers swapChainFramebuffers;
     VulkanCommandPool commandPool;
+
+    VulkanDepthImage depthImage;
+    VulkanImageView depthImageView;
+
     VulkanIndexBuffer indexBuffer;
 
     VulkanTextureImage textureImage;
-    CubeMap cubeMap;
+    VulkanCubeMapImage cubeMap;
     VulkanImageView textureImageView;
     VulkanImageSampler textureSampler;
 
@@ -123,10 +127,6 @@ private:
 
     }
 
-    void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-
-    }
-
     void initVulkan() {
         instance =              VulkanInstance(enableValidationLayers, validationLayers);
         debugMessenger =        VulkanDebugMessenger(instance, enableValidationLayers);
@@ -134,12 +134,18 @@ private:
         physicalDevice =        VulkanPhysicalDevice(instance, surface, deviceExtensions);
         device =                VulkanLogicalDevice(physicalDevice, surface, deviceExtensions, validationLayers, enableValidationLayers);
         swapChain =             VulkanSwapChain(physicalDevice, device, surface, window);
-        camera =                Camera(window, glm::vec3(0, 0, 2), swapChain.swapChainExtent.width / 2, swapChain.swapChainExtent.height / 2);
+        camera =                Camera(window, glm::vec3(0, 0, 4), swapChain.swapChainExtent.width / 2, swapChain.swapChainExtent.height / 2);
         swapChainImageViews =   VulkanImageViews(device, swapChain);
-        renderPass =            VulkanRenderPass(device, swapChain);
+        renderPass =            VulkanRenderPass(physicalDevice, device, swapChain);
         descriptorSetLayout =   VulkanDescriptorSetLayout(device);
         graphicsPipeline =      VulkanGraphicsPipeline(device, renderPass, descriptorSetLayout);
-        swapChainFramebuffers = VulkanFrameBuffers(device, swapChain, swapChainImageViews, renderPass);
+        
+        // Depth checking
+        VkFormat depthFormat =  VulkanDepthImage::findDepthFormat(physicalDevice);
+        depthImage =            VulkanDepthImage(physicalDevice, device, swapChain, depthFormat);
+        depthImageView =        VulkanImageView(device, depthImage, 1, VK_IMAGE_VIEW_TYPE_2D, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+        
+        swapChainFramebuffers = VulkanFrameBuffers(device, swapChain, swapChainImageViews, depthImageView, renderPass);
         commandPool =           VulkanCommandPool(physicalDevice, device, surface);
 
         const char* path = "textures/texture.png";
@@ -148,30 +154,24 @@ private:
         for (int i = 0; i < 6; i++) {
             cubeMapData.pixels[i] = stbi_load(path, &cubeMapData.texWidth, &cubeMapData.texHeight, &cubeMapData.texChannels, STBI_rgb_alpha);
         }
-        cubeMap = CubeMap(physicalDevice, device, commandPool, cubeMapData);
-
-        //ImageData imageData{};
-        //imageData.pixels = stbi_load(path, &imageData.texWidth, &imageData.texHeight, &imageData.texChannels, STBI_rgb_alpha);
-
-        //textureImage =          VulkanTextureImage(physicalDevice, device, commandPool, imageData);
-        //textureImageView =      VulkanImageView(device, textureImage, 1, VK_IMAGE_VIEW_TYPE_2D, VK_FORMAT_R8G8B8A8_SRGB);
-        textureImageView =      VulkanImageView(device, cubeMap, 6, VK_IMAGE_VIEW_TYPE_CUBE, VK_FORMAT_R8G8B8A8_SRGB);
+        cubeMap =               VulkanCubeMapImage(physicalDevice, device, commandPool, cubeMapData);
+        textureImageView =      VulkanImageView(device, cubeMap, 6, VK_IMAGE_VIEW_TYPE_CUBE, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
         textureSampler =        VulkanImageSampler(physicalDevice, device);
         vertexBuffer =          VulkanVertexBuffer(physicalDevice, device, commandPool, 1048576*40);
+        indexBuffer =           VulkanIndexBuffer(physicalDevice, device, commandPool, indices);
 
         for (int i = 0; i < MAX_OBJECTS; i++) {
             objectList.push_back(BasicObject(
                 physicalDevice,
                 device,
                 commandPool,
-                Matricies::createModelMatrix(glm::vec3(i*2, 0, -i*2), 0.5f, glm::radians(90.0), glm::vec3(0.0, 0.0, 1.0)),
+                Matricies::createModelMatrix(glm::vec3(i*2, 0, -i*2), 1.0f, glm::radians(0.0), glm::vec3(0.0, 0.0, 1.0)),
                 vertices,
                 indices,
                 vertexBuffer
             ));
         }
 
-        indexBuffer =           VulkanIndexBuffer(physicalDevice, device, commandPool, indices);
 
         uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -197,12 +197,16 @@ private:
     void cleanup() {
         cleanupSwapChain();
 
-        vkDestroyImageView(device.device, textureImageView.textureImageView, nullptr);
+        vkDestroyImageView(device.device, depthImageView.textureImageView, nullptr);
+        vkDestroyImage(device.device, depthImage.image, nullptr);
+        vkFreeMemory(device.device, depthImage.imageMemory, nullptr);
 
+        vkDestroyImageView(device.device, textureImageView.textureImageView, nullptr);
         vkDestroySampler(device.device, textureSampler.textureSampler, nullptr);
         //vkDestroyImage(device.device, textureImage.image, nullptr);
+        //vkFreeMemory(device.device, textureImage.imageMemory, nullptr);
         vkDestroyImage(device.device, cubeMap.image, nullptr);
-        vkFreeMemory(device.device, textureImage.imageMemory, nullptr);
+        vkFreeMemory(device.device, cubeMap.imageMemory, nullptr);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroyBuffer(device.device, uniformBuffers[i].buffer, nullptr);
@@ -272,7 +276,12 @@ private:
 
         swapChain = VulkanSwapChain(physicalDevice, device, surface, window);
         swapChainImageViews = VulkanImageViews(device, swapChain);
-        swapChainFramebuffers = VulkanFrameBuffers(device, swapChain, swapChainImageViews, renderPass);
+
+        VkFormat depthFormat = VulkanDepthImage::findDepthFormat(physicalDevice);
+        depthImage = VulkanDepthImage(physicalDevice, device, swapChain, depthFormat);
+        depthImageView = VulkanImageView(device, depthImage, 1, VK_IMAGE_VIEW_TYPE_2D, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
+
+        swapChainFramebuffers = VulkanFrameBuffers(device, swapChain, swapChainImageViews, depthImageView, renderPass);
     }
 
     void drawFrame() {
@@ -353,9 +362,12 @@ private:
         renderPassInfo.renderArea.offset = { 0, 0 };
         renderPassInfo.renderArea.extent = swapChain.swapChainExtent;
 
-        VkClearValue clearColor = { {{0.0f, 0.0f, 0.0f, 1.0f}} };
-        renderPassInfo.clearValueCount = 1;
-        renderPassInfo.pClearValues = &clearColor;
+        std::array<VkClearValue, 2> clearValues{};
+        clearValues[0].color = { {0.0f, 0.0f, 0.0f, 1.0f} };
+        clearValues[1].depthStencil = { 1.0f, 0 };
+
+        renderPassInfo.clearValueCount = static_cast<uint32_t>(clearValues.size());
+        renderPassInfo.pClearValues = clearValues.data();
 
         vkCmdBeginRenderPass(commandBuffer, &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.graphicsPipeline);

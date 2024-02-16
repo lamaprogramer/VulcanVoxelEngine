@@ -138,7 +138,10 @@
     <ClCompile Include="VulkanImageSampler.cpp">
       <Filter>Source Files\vk</Filter>
     </ClCompile>
-    <ClCompile Include="CubeMap.cpp">
+    <ClCompile Include="VulkanCubeMapImage.cpp">
+      <Filter>Source Files\vk\images</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanDepthImage.cpp">
       <Filter>Source Files\vk\images</Filter>
     </ClCompile>
   </ItemGroup>
@@ -236,7 +239,10 @@
     <ClInclude Include="VulkanImageSampler.h">
       <Filter>Header Files\vk</Filter>
     </ClInclude>
-    <ClInclude Include="CubeMap.h">
+    <ClInclude Include="VulkanCubeMapImage.h">
+      <Filter>Header Files\vk\images</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanDepthImage.h">
       <Filter>Header Files\vk\images</Filter>
     </ClInclude>
   </ItemGroup>

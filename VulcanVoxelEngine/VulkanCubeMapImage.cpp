@@ -1,8 +1,8 @@
-#include "CubeMap.h"
+#include "VulkanCubeMapImage.h"
 #define STB_IMAGE_IMPLEMENTATION
 
-CubeMap::CubeMap() {}
-CubeMap::CubeMap(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, CubeMapData cubeMapData) : VulkanImage{
+VulkanCubeMapImage::VulkanCubeMapImage() {}
+VulkanCubeMapImage::VulkanCubeMapImage(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, CubeMapData cubeMapData) : VulkanImage{
         physicalDevice,
         device,
         cubeMapData.texWidth,

@@ -6,5 +6,5 @@ public:
 	VkImageView textureImageView;
 
 	VulkanImageView();
-	VulkanImageView(VulkanLogicalDevice device, VulkanImage image, uint32_t layerCount, VkImageViewType type, VkFormat format);
+	VulkanImageView(VulkanLogicalDevice device, VulkanImage image, uint32_t layerCount, VkImageViewType type, VkFormat format, VkImageAspectFlags aspectFlags);
 };

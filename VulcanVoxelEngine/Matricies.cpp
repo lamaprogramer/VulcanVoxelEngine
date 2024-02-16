@@ -4,7 +4,7 @@ glm::mat4 Matricies::createModelMatrix(glm::vec3 translation, float scaleFactor,
 	glm::mat4 modelMatrix = glm::mat4(1.0);
 	modelMatrix = glm::translate(modelMatrix, translation);
 	modelMatrix = glm::rotate(modelMatrix, angleInRadians, rotationAxis);
-	modelMatrix = glm::scale(modelMatrix, glm::vec3(1.0f));
+	modelMatrix = glm::scale(modelMatrix, glm::vec3(scaleFactor));
 
 	return modelMatrix;
 }
