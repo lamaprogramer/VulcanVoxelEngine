@@ -5,6 +5,8 @@
 #include <fstream>
 #include "BasicObject.h"
 #include "Vertex.h"
+#include "Instance.h"
+#include "VulkanVertexInputUtil.h"
 
 class VulkanGraphicsPipeline {
 public:

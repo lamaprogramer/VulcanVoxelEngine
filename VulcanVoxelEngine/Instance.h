@@ -3,16 +3,15 @@
 #include <glm/glm.hpp>
 #include <array>
 
-struct Vertex {
-    glm::vec3 pos;
-    glm::vec3 color;
-    glm::vec2 texCoord;
+
+struct Instance {
+    glm::mat4 modelMatrix;
 
     static VkVertexInputBindingDescription getBindingDescription() {
         VkVertexInputBindingDescription bindingDescription{};
-        bindingDescription.binding = 0;
-        bindingDescription.stride = sizeof(Vertex);
-        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+        bindingDescription.binding = 1;
+        bindingDescription.stride = sizeof(Instance);
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_INSTANCE;
 
         return bindingDescription;
     }

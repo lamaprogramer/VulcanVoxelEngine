@@ -6,6 +6,7 @@
 #include "VulkanVertexBuffer.h"
 #include "VulkanIndexBuffer.h"
 #include "VulkanUniformBuffer.h"
+#include "VulkanInstanceBuffer.h"
 #include "VulkanDescriptorSets.h"
 #include "VulkanTextureImage.h"
 #include "VulkanImageView.h"
@@ -16,6 +17,7 @@
 #include "Camera.h"
 #include "BasicObject.h"
 #include <glm/gtc/matrix_transform.hpp> 
+#include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/transform.hpp>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -33,7 +35,7 @@ const std::vector<const char*> deviceExtensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-const std::vector<Vertex> vertices = {
+std::vector<Vertex> vertices = {
     {{-1.0f, -1.0f, 1.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}}, // 0
     {{1.0f, -1.0f,  1.0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}}, // 1
     {{1.0f,  1.0f,  1.0f}, {0.0f, 1.0f, 0.0f}, {1.0f, 0.0f}}, // 2
@@ -45,11 +47,11 @@ const std::vector<Vertex> vertices = {
     {{-1.0f,  1.0f, -1.0f}, {1.0f, 0.0f, 0.0f}, {0.0f, 0.0f} } // 7
 };
 
-const std::vector<uint16_t> indices = {
+std::vector<uint16_t> indices = {
         0,1,2, 2,3,0, 1,5,6, 6,2,1, 7,6,5, 5,4,7, 4,0,3, 3,7,4, 4,5,1, 1,0,4, 3,2,6, 6,7,3,
 };
 
-const int MAX_OBJECTS = 50;
+const int MAX_OBJECTS = 100*100;
 std::vector<BasicObject> objectList{};
 
 
@@ -73,6 +75,9 @@ private:
     GLFWwindow* window;
     const uint32_t WIDTH = 800;
     const uint32_t HEIGHT = 600;
+    float secondsPassed = 0;
+    int fps = 0;
+
 
     VulkanInstance instance;
     VulkanDebugMessenger debugMessenger;
@@ -98,6 +103,7 @@ private:
     VulkanImageSampler textureSampler;
 
     VulkanVertexBuffer vertexBuffer;
+    VulkanInstanceBuffer instanceBuffer;
 
     std::vector<VulkanUniformBuffer> uniformBuffers;
     VulkanDescriptorPool descriptorPool;
@@ -157,20 +163,42 @@ private:
         cubeMap =               VulkanCubeMapImage(physicalDevice, device, commandPool, cubeMapData);
         textureImageView =      VulkanImageView(device, cubeMap, 6, VK_IMAGE_VIEW_TYPE_CUBE, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
         textureSampler =        VulkanImageSampler(physicalDevice, device);
-        vertexBuffer =          VulkanVertexBuffer(physicalDevice, device, commandPool, 1048576*40);
-        indexBuffer =           VulkanIndexBuffer(physicalDevice, device, commandPool, indices);
 
-        for (int i = 0; i < MAX_OBJECTS; i++) {
-            objectList.push_back(BasicObject(
-                physicalDevice,
-                device,
-                commandPool,
-                Matricies::createModelMatrix(glm::vec3(i*2, 0, -i*2), 1.0f, glm::radians(0.0), glm::vec3(0.0, 0.0, 1.0)),
-                vertices,
-                indices,
-                vertexBuffer
-            ));
+        instanceBuffer =        VulkanInstanceBuffer(physicalDevice, device, commandPool, 1048576 * 40);
+        vertexBuffer =          VulkanVertexBuffer(physicalDevice, device, commandPool, 1048576 * 40);
+        indexBuffer =           VulkanIndexBuffer(physicalDevice, device, commandPool, 1048576 * 40);
+
+        std::vector<Instance> instanceData;
+        std::vector<std::vector<uint16_t>> indexData;
+
+        instanceData.resize(MAX_OBJECTS);
+        indexData.resize(MAX_OBJECTS);
+        objectList.resize(MAX_OBJECTS);
+
+        for (int z = 0; z < 100; z++) {
+            for (int x = 0; x < 100; x++) {
+                objectList[z * 100 + x] = BasicObject(
+                    physicalDevice,
+                    device,
+                    commandPool,
+                    Matricies::createModelMatrix(glm::vec3(x, 0, z), 0.5f, glm::radians(0.0), glm::vec3(0.0, 0.0, 1.0)),
+                    vertices,
+                    indices
+                );
+
+
+                BasicObject object = objectList[z * 100 + x];
+
+                Instance modelInstance{};
+                modelInstance.modelMatrix = object.matrix.modelMatrix;
+                instanceData[z * 100 + x] = modelInstance;
+
+                indexData[z * 100 + x] = indices;
+            }
         }
+        indexBuffer.updateBufferWithStaging(physicalDevice, device, commandPool, indices.data(), (sizeof(indices[0]) * indices.size()) * indexData.size(), indexBuffer.bufferOffset);
+        instanceBuffer.updateBufferWithStaging(physicalDevice, device, commandPool, instanceData.data(), sizeof(Instance) * instanceData.size(), 0);
+        vertexBuffer.updateBufferWithStaging(physicalDevice, device, commandPool, vertices.data(), sizeof(vertices[0]) * vertices.size(), 0);
 
 
         uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
@@ -220,6 +248,9 @@ private:
 
         vkDestroyBuffer(device.device, vertexBuffer.buffer, nullptr);
         vkFreeMemory(device.device, vertexBuffer.bufferMemory, nullptr);
+
+        vkDestroyBuffer(device.device, instanceBuffer.buffer, nullptr);
+        vkFreeMemory(device.device, instanceBuffer.bufferMemory, nullptr);
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(device.device, syncObjects.renderFinishedSemaphores[i], nullptr);
             vkDestroySemaphore(device.device, syncObjects.imageAvailableSemaphores[i], nullptr);
@@ -285,6 +316,16 @@ private:
     }
 
     void drawFrame() {
+        // Calculate FPS
+        fps += 1;
+        float currentTime = glfwGetTime();
+        if (currentTime - secondsPassed > 1) {
+            secondsPassed = currentTime;
+            std::cout << "FPS: " << fps << "\n";
+            fps = 0;
+        }
+
+
         vkWaitForFences(device.device, 1, &syncObjects.inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
         uint32_t imageIndex;
@@ -313,8 +354,9 @@ private:
         ubo.view = camera.getViewMatrix();
         ubo.proj = Matricies::createPerspectiveMatrix(glm::radians(45.0f), swapChain.swapChainExtent.width / (float)swapChain.swapChainExtent.height);
 
+        ubo.proj[1][1] *= -1;
+        uniformBuffers[currentFrame].updateBuffer(device, &ubo, sizeof(ubo), 0);
 
-        uniformBuffers[currentFrame].updateUniformBuffer(ubo);
 
         VkSubmitInfo submitInfo{};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
@@ -387,16 +429,15 @@ private:
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
         VkBuffer vertexBuffers[] = { vertexBuffer.buffer };
-        VkDeviceSize offsets[] = { 0 };
+        VkBuffer instanceBuffers[] = { instanceBuffer.buffer };
+        VkDeviceSize offsets[1] = { 0 };
+
         vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+        vkCmdBindVertexBuffers(commandBuffer, 1, 1, &instanceBuffer.buffer, offsets);
         vkCmdBindIndexBuffer(commandBuffer, indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
 
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.pipelineLayout, 0, 1, &descriptorSets.descriptorSets[currentFrame], 0, nullptr);
-        
-        for (int i = 0; i < MAX_OBJECTS; i++) {
-            vkCmdPushConstants(commandBuffer, graphicsPipeline.pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT, 0, sizeof(ModelMatrixObject), (void*)&objectList[i].matrix);
-            vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), 1, 0, 0, 0);
-        }
+        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(indices.size()), MAX_OBJECTS, 0, 0, 0);
 
         vkCmdEndRenderPass(commandBuffer);
 

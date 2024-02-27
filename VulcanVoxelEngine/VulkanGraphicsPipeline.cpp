@@ -23,14 +23,29 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, Vulka
 
     VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
 
-    // Vertex input
-    auto bindingDescription = Vertex::getBindingDescription();
-    auto attributeDescriptions = Vertex::getAttributeDescriptions();
+    std::vector<VkVertexInputBindingDescription> bindingDescription = {
+        Vertex::getBindingDescription(),
+        Instance::getBindingDescription()
+    };
 
+    uint32_t vec4Size = sizeof(glm::vec4);
+    std::vector<VkVertexInputAttributeDescription> attributeDescriptions = {
+        VulkanVertexInputUtil::createVertexInputAttributeDescription(0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Vertex::pos)),
+        VulkanVertexInputUtil::createVertexInputAttributeDescription(0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Vertex::color)),
+        VulkanVertexInputUtil::createVertexInputAttributeDescription(0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, Vertex::texCoord)),
+
+        VulkanVertexInputUtil::createVertexInputAttributeDescription(1, 3, VK_FORMAT_R32G32B32A32_SFLOAT, 0),
+        VulkanVertexInputUtil::createVertexInputAttributeDescription(1, 4, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float)*4),
+        VulkanVertexInputUtil::createVertexInputAttributeDescription(1, 5, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float)*8),
+        VulkanVertexInputUtil::createVertexInputAttributeDescription(1, 6, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float)*12),
+
+    };
+
+    // Vertex input
     VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-    vertexInputInfo.vertexBindingDescriptionCount = 1;
-    vertexInputInfo.pVertexBindingDescriptions = &bindingDescription; // Optional
+    vertexInputInfo.vertexBindingDescriptionCount = bindingDescription.size();
+    vertexInputInfo.pVertexBindingDescriptions = bindingDescription.data(); // Optional
     vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
     vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data(); // Optional
 

@@ -144,6 +144,12 @@
     <ClCompile Include="VulkanDepthImage.cpp">
       <Filter>Source Files\vk\images</Filter>
     </ClCompile>
+    <ClCompile Include="VulkanInstanceBuffer.cpp">
+      <Filter>Source Files\vk\buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanVertexInputUtil.cpp">
+      <Filter>Source Files\vk\util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VulkanInstance.h">
@@ -244,6 +250,15 @@
     </ClInclude>
     <ClInclude Include="VulkanDepthImage.h">
       <Filter>Header Files\vk\images</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanInstanceBuffer.h">
+      <Filter>Header Files\vk\buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Instance.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanVertexInputUtil.h">
+      <Filter>Header Files\vk\util</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

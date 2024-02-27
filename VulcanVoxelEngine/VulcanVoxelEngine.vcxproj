@@ -166,6 +166,7 @@
     <ClCompile Include="VulkanImageViews.cpp" />
     <ClCompile Include="VulkanIndexBuffer.cpp" />
     <ClCompile Include="VulkanInstance.cpp" />
+    <ClCompile Include="VulkanInstanceBuffer.cpp" />
     <ClCompile Include="VulkanLogicalDevice.cpp" />
     <ClCompile Include="VulkanPhysicalDevice.cpp" />
     <ClCompile Include="VulkanRenderPass.cpp" />
@@ -175,11 +176,13 @@
     <ClCompile Include="VulkanTextureImage.cpp" />
     <ClCompile Include="VulkanUniformBuffer.cpp" />
     <ClCompile Include="VulkanVertexBuffer.cpp" />
+    <ClCompile Include="VulkanVertexInputUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasicObject.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraKeybinds.h" />
+    <ClInclude Include="Instance.h" />
     <ClInclude Include="VulkanCubeMapImage.h" />
     <ClInclude Include="Matrices.h" />
     <ClInclude Include="VulkanDepthImage.h" />
@@ -199,6 +202,7 @@
     <ClInclude Include="VulkanImageUtil.h" />
     <ClInclude Include="VulkanImageViews.h" />
     <ClInclude Include="VulkanIndexBuffer.h" />
+    <ClInclude Include="VulkanInstanceBuffer.h" />
     <ClInclude Include="VulkanLogicalDevice.h" />
     <ClInclude Include="VulkanDebugMessenger.h" />
     <ClInclude Include="VulkanInstance.h" />
@@ -210,6 +214,7 @@
     <ClInclude Include="VulkanTextureImage.h" />
     <ClInclude Include="VulkanUniformBuffer.h" />
     <ClInclude Include="VulkanVertexBuffer.h" />
+    <ClInclude Include="VulkanVertexInputUtil.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

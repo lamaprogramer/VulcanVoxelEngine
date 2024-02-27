@@ -16,7 +16,9 @@ public:
 	VulkanBuffer(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
 
 	VkDescriptorBufferInfo createDescriptorBufferInfo(size_t range);
-
+	void updateBufferWithStaging(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, void* data, VkDeviceSize dataSize, VkDeviceSize offset);
+	void updateBuffer(VulkanLogicalDevice device, void* bufferData, VkDeviceSize dataSize, VkDeviceSize offset);
+	
 	static uint32_t findMemoryType(VulkanPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties);
-	static void copyBuffer(VulkanLogicalDevice device, VulkanCommandPool commandPool, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+	static void copyBuffer(VulkanLogicalDevice device, VulkanCommandPool commandPool, VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize offset, VkDeviceSize size);
 };

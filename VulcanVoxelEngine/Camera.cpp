@@ -25,7 +25,7 @@ void Camera::update(GLFWwindow* window) {
 	deltaTime = currentFrame - lastFrame;
 	lastFrame = currentFrame;
 
-	float cameraSpeed = 2.5f * deltaTime;
+	float cameraSpeed = 10.5f * deltaTime;
 	if (glfwGetKey(window, keybinds.forward) == GLFW_PRESS) {
 		position += cameraSpeed * cameraFront;
 	}
