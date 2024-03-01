@@ -46,6 +46,12 @@
     <Filter Include="Source Files\vk\images">
       <UniqueIdentifier>{77db9812-17fe-4fb5-9fab-ef96516e3b6c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\vk\objects">
+      <UniqueIdentifier>{a676a5e5-bef3-4d66-a9db-40916f23a488}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\vk\objects">
+      <UniqueIdentifier>{6090354d-cae3-49eb-960b-484ca16a7909}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -67,9 +73,6 @@
       <Filter>Source Files\vk</Filter>
     </ClCompile>
     <ClCompile Include="VulkanSwapChain.cpp">
-      <Filter>Source Files\vk</Filter>
-    </ClCompile>
-    <ClCompile Include="VulkanImageViews.cpp">
       <Filter>Source Files\vk</Filter>
     </ClCompile>
     <ClCompile Include="VulkanRenderPass.cpp">
@@ -111,9 +114,6 @@
     <ClCompile Include="VulkanCommandBufferUtil.cpp">
       <Filter>Source Files\vk\util</Filter>
     </ClCompile>
-    <ClCompile Include="BasicObject.cpp">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
     <ClCompile Include="VulkanBuffer.cpp">
       <Filter>Source Files\vk\buffers</Filter>
     </ClCompile>
@@ -150,6 +150,12 @@
     <ClCompile Include="VulkanVertexInputUtil.cpp">
       <Filter>Source Files\vk\util</Filter>
     </ClCompile>
+    <ClCompile Include="BasicObject.cpp">
+      <Filter>Source Files\vk\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="CubeObject.cpp">
+      <Filter>Source Files\vk\objects</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VulkanInstance.h">
@@ -168,9 +174,6 @@
       <Filter>Header Files\vk</Filter>
     </ClInclude>
     <ClInclude Include="VulkanSwapChain.h">
-      <Filter>Header Files\vk</Filter>
-    </ClInclude>
-    <ClInclude Include="VulkanImageViews.h">
       <Filter>Header Files\vk</Filter>
     </ClInclude>
     <ClInclude Include="VulkanRenderPass.h">
@@ -218,9 +221,6 @@
     <ClInclude Include="VulkanCommandBufferUtil.h">
       <Filter>Header Files\vk\util</Filter>
     </ClInclude>
-    <ClInclude Include="BasicObject.h">
-      <Filter>Header Files\core</Filter>
-    </ClInclude>
     <ClInclude Include="VulkanBuffer.h">
       <Filter>Header Files\vk\buffers</Filter>
     </ClInclude>
@@ -259,6 +259,12 @@
     </ClInclude>
     <ClInclude Include="VulkanVertexInputUtil.h">
       <Filter>Header Files\vk\util</Filter>
+    </ClInclude>
+    <ClInclude Include="BasicObject.h">
+      <Filter>Header Files\vk\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="CubeObject.h">
+      <Filter>Header Files\vk\objects</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -15,6 +15,7 @@ public:
 	VulkanBuffer();
 	VulkanBuffer(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties);
 
+	void destroy(VulkanLogicalDevice device);
 	VkDescriptorBufferInfo createDescriptorBufferInfo(size_t range);
 	void updateBufferWithStaging(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, void* data, VkDeviceSize dataSize, VkDeviceSize offset);
 	void updateBuffer(VulkanLogicalDevice device, void* bufferData, VkDeviceSize dataSize, VkDeviceSize offset);

@@ -29,3 +29,7 @@ VulkanImageSampler::VulkanImageSampler(VulkanPhysicalDevice physicalDevice, Vulk
 		throw std::runtime_error("failed to create texture sampler!");
 	}
 }
+
+void VulkanImageSampler::destroy(VulkanLogicalDevice device) {
+	vkDestroySampler(device.device, textureSampler, nullptr);
+}

@@ -2,12 +2,12 @@
 
 VulkanFrameBuffers::VulkanFrameBuffers() {}
 
-VulkanFrameBuffers::VulkanFrameBuffers(VulkanLogicalDevice device, VulkanSwapChain swapChain, VulkanImageViews swapChainImageViews, VulkanImageView depthImageView, VulkanRenderPass renderPass) {
-    swapChainFramebuffers.resize(swapChainImageViews.swapChainImageViews.size());
+VulkanFrameBuffers::VulkanFrameBuffers(VulkanLogicalDevice device, VulkanSwapChain swapChain, std::vector<VulkanImageView> swapChainImageViews, VulkanImageView depthImageView, VulkanRenderPass renderPass) {
+    swapChainFramebuffers.resize(swapChainImageViews.size());
 
-    for (size_t i = 0; i < swapChainImageViews.swapChainImageViews.size(); i++) {
+    for (size_t i = 0; i < swapChainImageViews.size(); i++) {
         std::array<VkImageView, 2> attachments = {
-            swapChainImageViews.swapChainImageViews[i],
+            swapChainImageViews[i].textureImageView,
             depthImageView.textureImageView
         };
 

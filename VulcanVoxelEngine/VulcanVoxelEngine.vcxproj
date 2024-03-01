@@ -145,6 +145,7 @@
   <ItemGroup>
     <ClCompile Include="BasicObject.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="CubeObject.cpp" />
     <ClCompile Include="VulkanCubeMapImage.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matricies.cpp" />
@@ -163,7 +164,6 @@
     <ClCompile Include="VulkanGraphicsPipeline.cpp" />
     <ClCompile Include="VulkanImage.cpp" />
     <ClCompile Include="VulkanImageUtil.cpp" />
-    <ClCompile Include="VulkanImageViews.cpp" />
     <ClCompile Include="VulkanIndexBuffer.cpp" />
     <ClCompile Include="VulkanInstance.cpp" />
     <ClCompile Include="VulkanInstanceBuffer.cpp" />
@@ -182,6 +182,7 @@
     <ClInclude Include="BasicObject.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraKeybinds.h" />
+    <ClInclude Include="CubeObject.h" />
     <ClInclude Include="Instance.h" />
     <ClInclude Include="VulkanCubeMapImage.h" />
     <ClInclude Include="Matrices.h" />
@@ -200,7 +201,6 @@
     <ClInclude Include="VulkanGraphicsPipeline.h" />
     <ClInclude Include="VulkanImage.h" />
     <ClInclude Include="VulkanImageUtil.h" />
-    <ClInclude Include="VulkanImageViews.h" />
     <ClInclude Include="VulkanIndexBuffer.h" />
     <ClInclude Include="VulkanInstanceBuffer.h" />
     <ClInclude Include="VulkanLogicalDevice.h" />

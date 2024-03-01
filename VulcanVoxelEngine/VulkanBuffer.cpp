@@ -31,6 +31,11 @@ VulkanBuffer::VulkanBuffer(VulkanPhysicalDevice physicalDevice, VulkanLogicalDev
     vkBindBufferMemory(device.device, buffer, bufferMemory, 0);
 }
 
+void VulkanBuffer::destroy(VulkanLogicalDevice device) {
+    vkDestroyBuffer(device.device, buffer, nullptr);
+    vkFreeMemory(device.device, bufferMemory, nullptr);
+}
+
 VkDescriptorBufferInfo VulkanBuffer::createDescriptorBufferInfo(size_t range = VK_WHOLE_SIZE) {
     VkDescriptorBufferInfo bufferInfo{};
     bufferInfo.buffer = buffer;
@@ -57,8 +62,7 @@ void VulkanBuffer::updateBufferWithStaging(VulkanPhysicalDevice physicalDevice, 
     vkUnmapMemory(device.device, stagingBuffer.bufferMemory);
 
     copyBuffer(device, commandPool, stagingBuffer.buffer, buffer, offset, dataSize);
-    vkDestroyBuffer(device.device, stagingBuffer.buffer, nullptr);
-    vkFreeMemory(device.device, stagingBuffer.bufferMemory, nullptr);
+    stagingBuffer.destroy(device);
 
     bufferOffset += dataSize;
 

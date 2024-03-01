@@ -7,4 +7,6 @@ public:
 
 	VulkanImageSampler();
 	VulkanImageSampler(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device);
+
+	void destroy(VulkanLogicalDevice device);
 };

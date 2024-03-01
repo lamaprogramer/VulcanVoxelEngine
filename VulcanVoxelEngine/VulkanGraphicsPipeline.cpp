@@ -117,10 +117,10 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, Vulka
     viewportState.scissorCount = 1;
 
     // Push Constant Range
-    VkPushConstantRange vpcr[1];
-    vpcr[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    vpcr[0].offset = 0;
-    vpcr[0].size = sizeof(ModelMatrixObject);
+    //VkPushConstantRange vpcr[1];
+    //vpcr[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+    //vpcr[0].offset = 0;
+    //vpcr[0].size = sizeof(ModelMatrixObject);
 
 
 
@@ -129,8 +129,8 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, Vulka
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1;
     pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout.descriptorSetLayout;
-    pipelineLayoutInfo.pushConstantRangeCount = 1;
-    pipelineLayoutInfo.pPushConstantRanges = vpcr;
+    //pipelineLayoutInfo.pushConstantRangeCount = 1;
+    ///pipelineLayoutInfo.pPushConstantRanges = vpcr;
 
     if (vkCreatePipelineLayout(device.device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");

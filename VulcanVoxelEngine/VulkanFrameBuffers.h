@@ -8,5 +8,5 @@ public:
 	std::vector<VkFramebuffer> swapChainFramebuffers;
 
 	VulkanFrameBuffers();
-	VulkanFrameBuffers(VulkanLogicalDevice device, VulkanSwapChain swapChain, VulkanImageViews swapChainImageViews, VulkanImageView depthImageView, VulkanRenderPass renderPass);
+	VulkanFrameBuffers(VulkanLogicalDevice device, VulkanSwapChain swapChain, std::vector<VulkanImageView> swapChainImageViews, VulkanImageView depthImageView, VulkanRenderPass renderPass);
 };

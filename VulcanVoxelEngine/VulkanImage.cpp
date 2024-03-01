@@ -89,6 +89,11 @@ void VulkanImage::transitionImageLayout(VulkanLogicalDevice device, VulkanComman
     VulkanCommandBufferUtil::endSingleTimeCommands(device, commandBuffer, commandPool);
 }
 
+void VulkanImage::destroy(VulkanLogicalDevice device) {
+    vkFreeMemory(device.device, imageMemory, nullptr);
+    vkDestroyImage(device.device, image, nullptr);
+}
+
 void VulkanImage::copyBufferToImage(VulkanLogicalDevice device, VulkanCommandPool commandPool, VkBuffer buffer, VkImage image, uint32_t layerCount, uint32_t width, uint32_t height) {
     VkCommandBuffer commandBuffer = VulkanCommandBufferUtil::beginSingleTimeCommands(device, commandPool);
 
