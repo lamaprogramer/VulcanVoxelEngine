@@ -6,4 +6,5 @@ class VulkanIndexBuffer: public VulkanBuffer {
 public:
 	VulkanIndexBuffer();
 	VulkanIndexBuffer(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, VkDeviceSize bufferSize);
+	VulkanIndexBuffer(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, VkDeviceSize bufferSize, VkMemoryPropertyFlags properties);
 };

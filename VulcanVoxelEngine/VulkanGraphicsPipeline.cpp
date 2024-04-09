@@ -2,7 +2,7 @@
 
 VulkanGraphicsPipeline::VulkanGraphicsPipeline() {}
 
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, VulkanRenderPass renderPass, VulkanDescriptorSetLayout descriptorSetLayout) {
+VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, VulkanRenderPass renderPass, std::vector<VkDescriptorSetLayout> descriptorSetLayouts) {
     auto vertShaderCode = readFile("shaders/vert.spv");
     auto fragShaderCode = readFile("shaders/cube.spv");
 
@@ -127,8 +127,8 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, Vulka
     // Pipeline layout
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = &descriptorSetLayout.descriptorSetLayout;
+    pipelineLayoutInfo.setLayoutCount = descriptorSetLayouts.size();
+    pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
     //pipelineLayoutInfo.pushConstantRangeCount = 1;
     ///pipelineLayoutInfo.pPushConstantRanges = vpcr;
 

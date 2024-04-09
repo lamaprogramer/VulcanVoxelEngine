@@ -5,8 +5,8 @@
 class CubeObject: public BasicObject {
 public:
     static std::vector<Vertex> cubeVertices;
-    static std::vector<uint16_t> cubeIndices;
+    static std::vector<uint32_t> cubeIndices;
 
 	CubeObject();
-	CubeObject(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, glm::mat4 matrix);
+	CubeObject(glm::vec3 position, std::string modelName, std::string textureName);
 };

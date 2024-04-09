@@ -24,6 +24,7 @@ VulkanLogicalDevice::VulkanLogicalDevice(VulkanPhysicalDevice physicalDevice, Vu
 
     VkPhysicalDeviceFeatures deviceFeatures{};
     deviceFeatures.samplerAnisotropy = VK_TRUE;
+    deviceFeatures.fillModeNonSolid = VK_TRUE;
 
     VkDeviceCreateInfo createInfo{};
 

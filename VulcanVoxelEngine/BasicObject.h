@@ -2,14 +2,17 @@
 #include "VulkanVertexBuffer.h"
 #include "Vertex.h"
 #include "Instance.h"
+#include "Matrices.h"
 
 class BasicObject {
 public:
 	Instance instance;
 	glm::vec3 worldPosition;
-	std::vector<Vertex> vertices;
-	std::vector<uint16_t> indices;
+	std::string modelName;
+	std::string textureName;
 
 	BasicObject();
-	BasicObject(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, glm::mat4 matrix, std::vector<Vertex> vertices, std::vector<uint16_t> indices);
+	BasicObject(glm::vec3 position, std::string modelName, std::string textureName);
+
+	void updatePosition(glm::vec3 position);
 };

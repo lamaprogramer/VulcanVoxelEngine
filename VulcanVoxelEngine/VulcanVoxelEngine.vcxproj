@@ -76,7 +76,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;C:\Users\willk\libs\cpp\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;C:\Users\willk\libs\cpp\stb;C:\Users\willk\libs\cpp\tiny_obj_loader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -94,7 +94,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;C:\Users\willk\libs\cpp\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;C:\Users\willk\libs\cpp\stb;C:\Users\willk\libs\cpp\tiny_obj_loader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -112,7 +112,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;C:\Users\willk\libs\cpp\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;C:\Users\willk\libs\cpp\stb;C:\Users\willk\libs\cpp\tiny_obj_loader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -130,7 +130,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;C:\Users\willk\libs\cpp\stb;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\VulkanSDK\1.3.275.0\Include;C:\Users\willk\libs\cpp\glfw-3.3.9.bin.WIN64\include;C:\Users\willk\libs\cpp\glm-1.0.0;C:\Users\willk\libs\cpp\stb;C:\Users\willk\libs\cpp\tiny_obj_loader;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
@@ -144,12 +144,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BasicObject.cpp" />
+    <ClCompile Include="Batch.cpp" />
+    <ClCompile Include="BatchManager.cpp" />
+    <ClCompile Include="Block.cpp" />
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="CubeObject.cpp" />
+    <ClCompile Include="ModelManager.cpp" />
+    <ClCompile Include="TextureManager.cpp" />
     <ClCompile Include="VulkanCubeMapImage.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Matricies.cpp" />
     <ClCompile Include="VulkanDepthImage.cpp" />
+    <ClCompile Include="VulkanDescriptorSet.cpp" />
     <ClCompile Include="VulkanImageSampler.cpp" />
     <ClCompile Include="VulkanImageView.cpp" />
     <ClCompile Include="VulkanBuffer.cpp" />
@@ -180,13 +187,22 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BasicObject.h" />
+    <ClInclude Include="Batch.h" />
+    <ClInclude Include="BatchManager.h" />
+    <ClInclude Include="Block.h" />
     <ClInclude Include="Camera.h" />
     <ClInclude Include="CameraKeybinds.h" />
+    <ClInclude Include="Chunk.h" />
     <ClInclude Include="CubeObject.h" />
     <ClInclude Include="Instance.h" />
+    <ClInclude Include="Model.h" />
+    <ClInclude Include="ModelManager.h" />
+    <ClInclude Include="Texture.h" />
+    <ClInclude Include="TextureManager.h" />
     <ClInclude Include="VulkanCubeMapImage.h" />
     <ClInclude Include="Matrices.h" />
     <ClInclude Include="VulkanDepthImage.h" />
+    <ClInclude Include="VulkanDescriptorSet.h" />
     <ClInclude Include="VulkanImageSampler.h" />
     <ClInclude Include="VulkanImageView.h" />
     <ClInclude Include="Vertex.h" />

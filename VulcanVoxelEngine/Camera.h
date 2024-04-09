@@ -15,15 +15,13 @@ public:
 	Camera();
 	Camera(GLFWwindow* window, glm::vec3 position, float centerX, float centerY);
 
-	void update(GLFWwindow* window);
+	void update(GLFWwindow* window, float deltaTime);
 	glm::mat4 getViewMatrix();
 	glm::vec3 getPosition();
 	glm::vec3 getFront();
 
 private:
 	CameraKeybinds keybinds;
-	float deltaTime = 0.0f;	// Time between current frame and last frame
-	float lastFrame = 0.0f;
 	float lastX, lastY;
 	bool firstMouse = true;
 

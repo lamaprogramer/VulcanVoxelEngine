@@ -3,8 +3,15 @@
 BasicObject::BasicObject() {
 
 }
-BasicObject::BasicObject(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, glm::mat4 modelMatrix, std::vector<Vertex> vertices, std::vector<uint16_t> indices) {
-	this->instance = { modelMatrix };
-	this->vertices = vertices;
-	this->indices = indices;
+
+
+BasicObject::BasicObject(glm::vec3 position, std::string modelName, std::string textureName) {
+	this->worldPosition = position;
+	this->instance = { Matricies::createModelMatrix(position, 0.5f, glm::radians(0.0), glm::vec3(0.0, 0.0, 1.0)) };
+	this->modelName = modelName;
+	this->textureName = textureName;
+}
+void BasicObject::updatePosition(glm::vec3 position) {
+	this->worldPosition = position;
+	this->instance.modelMatrix = Matricies::createModelMatrix(position, 0.5f, glm::radians(0.0), glm::vec3(0.0, 0.0, 1.0));
 }

@@ -20,12 +20,9 @@ Camera::Camera(GLFWwindow* window, glm::vec3 position, float centerX, float cent
 	lastY = centerY;
 }
 
-void Camera::update(GLFWwindow* window) {
-	float currentFrame = glfwGetTime();
-	deltaTime = currentFrame - lastFrame;
-	lastFrame = currentFrame;
-
+void Camera::update(GLFWwindow* window, float deltaTime) {
 	float cameraSpeed = 10.5f * deltaTime;
+
 	if (glfwGetKey(window, keybinds.forward) == GLFW_PRESS) {
 		position += cameraSpeed * cameraFront;
 	}

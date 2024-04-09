@@ -12,7 +12,8 @@ VulkanDescriptorPool::VulkanDescriptorPool(VulkanLogicalDevice device, int maxFr
 	poolInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 	poolInfo.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
 	poolInfo.pPoolSizes = poolSizes.data();
-	poolInfo.maxSets = static_cast<uint32_t>(maxFramesInFlight) * static_cast<uint32_t>(poolSizes.size());
+	poolInfo.maxSets = 1000;
+	//poolInfo.maxSets = static_cast<uint32_t>(maxFramesInFlight) * static_cast<uint32_t>(poolSizes.size());
 
 	if (vkCreateDescriptorPool(device.device, &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create descriptor pool!");

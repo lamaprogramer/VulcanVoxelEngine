@@ -1,12 +1,7 @@
 #include "VulkanDescriptorSetLayout.h"
 
 VulkanDescriptorSetLayout::VulkanDescriptorSetLayout() {}
-VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(VulkanLogicalDevice device) {
-
-    std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings = {
-            createDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0),
-            createDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 1)
-    };
+VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(VulkanLogicalDevice device, std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings) {
 
     VkDescriptorSetLayoutCreateInfo layoutInfo{};
     layoutInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;

@@ -6,7 +6,7 @@ public:
 	VkDescriptorSetLayout descriptorSetLayout;
 
 	VulkanDescriptorSetLayout();
-	VulkanDescriptorSetLayout(VulkanLogicalDevice device);
+	VulkanDescriptorSetLayout(VulkanLogicalDevice device, std::vector<VkDescriptorSetLayoutBinding> setLayoutBindings);
 
-	VkDescriptorSetLayoutBinding createDescriptorSetLayoutBinding(VkDescriptorType type, VkShaderStageFlags flags, uint32_t binding);
+	static VkDescriptorSetLayoutBinding createDescriptorSetLayoutBinding(VkDescriptorType type, VkShaderStageFlags flags, uint32_t binding);
 };

@@ -52,6 +52,12 @@
     <Filter Include="Source Files\vk\objects">
       <UniqueIdentifier>{6090354d-cae3-49eb-960b-484ca16a7909}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\core\managers">
+      <UniqueIdentifier>{0643ffbf-8d52-4a14-89d1-0b5dd6013abe}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\core\managers">
+      <UniqueIdentifier>{1803a3b3-686b-4d22-997d-2393ea24eb13}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -155,6 +161,27 @@
     </ClCompile>
     <ClCompile Include="CubeObject.cpp">
       <Filter>Source Files\vk\objects</Filter>
+    </ClCompile>
+    <ClCompile Include="Chunk.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="Block.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="VulkanDescriptorSet.cpp">
+      <Filter>Source Files\vk\util</Filter>
+    </ClCompile>
+    <ClCompile Include="Batch.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="BatchManager.cpp">
+      <Filter>Source Files\core\managers</Filter>
+    </ClCompile>
+    <ClCompile Include="ModelManager.cpp">
+      <Filter>Source Files\core\managers</Filter>
+    </ClCompile>
+    <ClCompile Include="TextureManager.cpp">
+      <Filter>Source Files\core\managers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -265,6 +292,33 @@
     </ClInclude>
     <ClInclude Include="CubeObject.h">
       <Filter>Header Files\vk\objects</Filter>
+    </ClInclude>
+    <ClInclude Include="Chunk.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Block.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="VulkanDescriptorSet.h">
+      <Filter>Header Files\vk\util</Filter>
+    </ClInclude>
+    <ClInclude Include="Batch.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="BatchManager.h">
+      <Filter>Header Files\core\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="ModelManager.h">
+      <Filter>Header Files\core\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="TextureManager.h">
+      <Filter>Header Files\core\managers</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture.h">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,3 +1,6 @@
+#define TINYOBJLOADER_IMPLEMENTATION
+#define STB_IMAGE_IMPLEMENTATION
+
 #include "VulkanFrameBuffers.h"
 #include "VulkanGraphicsPipeline.h"
 #include "VulkanCommandBuffers.h"
@@ -16,12 +19,12 @@
 #include "Vertex.h"
 #include "Camera.h"
 #include "CubeObject.h"
+#include "Chunk.h"
+#include "Batch.h"
+#include "BatchManager.h"
 #include <glm/gtc/matrix_transform.hpp> 
 #include <glm/gtx/matrix_decompose.hpp>
 #include <glm/gtx/transform.hpp>
-
-#define STB_IMAGE_IMPLEMENTATION
-#include <stb_image.h>
 
 using namespace std;
 
@@ -35,8 +38,13 @@ const std::vector<const char*> deviceExtensions = {
     VK_KHR_SWAPCHAIN_EXTENSION_NAME
 };
 
-const int MAX_OBJECTS = 100*100;
 std::vector<BasicObject> objectList{};
+std::vector<Instance> instanceData{};
+
+
+std::vector<std::vector<Chunk>> world = std::vector(64, std::vector<Chunk>(64));
+
+
 
 #ifdef NDEBUG
 const bool enableValidationLayers = false;
@@ -66,22 +74,26 @@ private:
     VulkanPhysicalDevice physicalDevice;
     VulkanLogicalDevice device;
     VulkanSwapChain swapChain;
-   // VulkanImageViews swapChainImageViews;
     std::vector<VulkanImageView> swapChainImageViews;
     VulkanRenderPass renderPass;
+
     VulkanDescriptorSetLayout descriptorSetLayout;
+    VulkanDescriptorSetLayout globalDescriptorSetLayout;
+
     VulkanGraphicsPipeline graphicsPipeline;
     VulkanFrameBuffers swapChainFramebuffers;
     VulkanCommandPool commandPool;
     VulkanDepthImage depthImage;
     VulkanImageView depthImageView;
-    VulkanIndexBuffer indexBuffer;
     VulkanTextureImage textureImage;
     VulkanCubeMapImage cubeMap;
     VulkanImageView textureImageView;
     VulkanImageSampler textureSampler;
-    VulkanVertexBuffer vertexBuffer;
-    VulkanInstanceBuffer instanceBuffer;
+
+    ModelManager modelManager;
+    TextureManager textureManager;
+    BatchManager batchManager;
+
     std::vector<VulkanUniformBuffer> uniformBuffers;
     VulkanDescriptorPool descriptorPool;
     VulkanDescriptorSets descriptorSets;
@@ -91,6 +103,10 @@ private:
 
     bool framebufferResized = false;
     uint32_t currentFrame = 0;
+    std::vector<Batch> batches;
+
+    float deltaTime = 0.0f;	// Time between current frame and last frame
+    float lastFrame = 0.0f;
 
     float lastX = 400, lastY = 300;
 
@@ -115,17 +131,30 @@ private:
         physicalDevice =        VulkanPhysicalDevice(instance, surface, deviceExtensions);
         device =                VulkanLogicalDevice(physicalDevice, surface, deviceExtensions, validationLayers, enableValidationLayers);
         swapChain =             VulkanSwapChain(physicalDevice, device, surface, window);
-        camera =                Camera(window, glm::vec3(0, 0, 4), swapChain.swapChainExtent.width / 2, swapChain.swapChainExtent.height / 2);
 
         swapChainImageViews.resize(swapChain.swapChainImages.size());
         for (size_t i = 0; i < swapChain.swapChainImages.size(); i++) {
             swapChainImageViews[i] = VulkanImageView(device, swapChain.swapChainImages[i], 1, VK_IMAGE_VIEW_TYPE_2D, swapChain.swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT);
         }
 
-
         renderPass =            VulkanRenderPass(physicalDevice, device, swapChain);
-        descriptorSetLayout =   VulkanDescriptorSetLayout(device);
-        graphicsPipeline =      VulkanGraphicsPipeline(device, renderPass, descriptorSetLayout);
+
+        descriptorSetLayout = VulkanDescriptorSetLayout(device, std::vector{
+                //VulkanDescriptorSetLayout::createDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0),
+                VulkanDescriptorSetLayout::createDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, VK_SHADER_STAGE_FRAGMENT_BIT, 0)
+            }
+        );
+
+        globalDescriptorSetLayout = VulkanDescriptorSetLayout(device, std::vector{
+                VulkanDescriptorSetLayout::createDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0),
+            }
+        );
+
+        graphicsPipeline = VulkanGraphicsPipeline(device, renderPass, std::vector{
+                globalDescriptorSetLayout.descriptorSetLayout,
+                descriptorSetLayout.descriptorSetLayout
+            }
+        );
         
         // Depth checking
         VkFormat depthFormat =  VulkanDepthImage::findDepthFormat(physicalDevice);
@@ -135,19 +164,16 @@ private:
         swapChainFramebuffers = VulkanFrameBuffers(device, swapChain, swapChainImageViews, depthImageView, renderPass);
         commandPool =           VulkanCommandPool(physicalDevice, device, surface);
 
-        const char* path = "textures/texture.png";
-        CubeMapData cubeMapData{};
+        modelManager = ModelManager();
+        modelManager.addModel("cube", CubeObject::cubeVertices, CubeObject::cubeIndices);
+        modelManager.addModel("cube2", CubeObject::cubeVertices, CubeObject::cubeIndices);
+        modelManager.loadModel("models/viking_room.obj");
 
-        for (int i = 0; i < 6; i++) {
-            cubeMapData.pixels[i] = stbi_load(path, &cubeMapData.texWidth, &cubeMapData.texHeight, &cubeMapData.texChannels, STBI_rgb_alpha);
-        }
-        cubeMap =               VulkanCubeMapImage(physicalDevice, device, commandPool, cubeMapData);
-        textureImageView =      VulkanImageView(device, cubeMap.image, 6, VK_IMAGE_VIEW_TYPE_CUBE, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
-        textureSampler =        VulkanImageSampler(physicalDevice, device);
+        textureManager = TextureManager();
+        textureManager.loadCubeTexture(physicalDevice, device, commandPool, "textures/cube.png");
+        textureManager.loadCubeTexture(physicalDevice, device, commandPool, "textures/viking_room.png");
 
-        instanceBuffer =        VulkanInstanceBuffer(physicalDevice, device, commandPool, 1048576 * 40);
-        vertexBuffer =          VulkanVertexBuffer(physicalDevice, device, commandPool, 1048576 * 40);
-        indexBuffer =           VulkanIndexBuffer(physicalDevice, device, commandPool, 1048576 * 40);
+        batchManager = BatchManager(physicalDevice, device, commandPool, 1048576 * 40);
 
         uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -156,54 +182,45 @@ private:
         }
 
         descriptorPool =        VulkanDescriptorPool(device, MAX_FRAMES_IN_FLIGHT);
-        descriptorSets =        VulkanDescriptorSets(device, uniformBuffers, descriptorPool, descriptorSetLayout, textureImageView, textureSampler, MAX_FRAMES_IN_FLIGHT);
+
+        descriptorSets =        VulkanDescriptorSets(device, uniformBuffers, descriptorPool, globalDescriptorSetLayout, descriptorSetLayout, textureManager.textures, MAX_FRAMES_IN_FLIGHT);
 
         commandBuffers =        VulkanCommandBuffers(device, commandPool, MAX_FRAMES_IN_FLIGHT);
         syncObjects =           VulkanSyncObjects(device, MAX_FRAMES_IN_FLIGHT);
 
-        std::vector<Instance> instanceData;
+        camera = Camera(window, glm::vec3(4, 1, 4), swapChain.swapChainExtent.width / 2, swapChain.swapChainExtent.height / 2);
 
-        instanceData.resize(MAX_OBJECTS);
-        objectList.resize(MAX_OBJECTS);
+        //BasicObject vikingRoom = BasicObject(glm::vec3(0, 12, 0), "viking_room", "viking_room");
+        //objectList.push_back(vikingRoom);
+        //instanceData.push_back(vikingRoom.instance);
 
-        for (int z = 0; z < 100; z++) {
-            for (int x = 0; x < 100; x++) {
-                CubeObject object = CubeObject(
-                    physicalDevice,
-                    device,
-                    commandPool,
-                    Matricies::createModelMatrix(glm::vec3(x, 0, z), 0.5f, glm::radians(0.0), glm::vec3(0.0, 0.0, 1.0))
-                );
+        for (int y = 0; y < 10; y++) {
+            for (int z = 0; z < 10; z++) {
+                for (int x = 0; x < 10; x++) {
+                    CubeObject object = CubeObject(
+                        glm::vec3(x, y, z),
+                        "cube2",
+                        "cube"
+                    );
 
-                objectList[z * 100 + x] = object;
-                instanceData[z * 100 + x] = object.instance;
+                    //objectList[z * 100 + x] = object;
+                    objectList.push_back(object);
+                    instanceData.push_back(object.instance);
+                    //instanceData[z * 100 + x] = object.instance;
+                }
             }
         }
-        indexBuffer.updateBufferWithStaging(
-            physicalDevice,
-            device,
-            commandPool,
-            CubeObject::cubeIndices.data(),
-            sizeof(CubeObject::cubeIndices[0]) * CubeObject::cubeIndices.size(),
-            indexBuffer.bufferOffset
+        CubeObject object = CubeObject(
+            glm::vec3(0, 13, 0),
+            "viking_room",
+            "cube"
         );
-        instanceBuffer.updateBufferWithStaging(
-            physicalDevice,
-            device,
-            commandPool,
-            instanceData.data(),
-            sizeof(Instance) * instanceData.size(),
-            0
-        );
-        vertexBuffer.updateBufferWithStaging(
-            physicalDevice,
-            device,
-            commandPool,
-            CubeObject::cubeVertices.data(),
-            sizeof(CubeObject::cubeVertices[0]) * CubeObject::cubeVertices.size(),
-            0
-        );
+
+        ////objectList[z * 100 + x] = object;
+        objectList.push_back(object);
+        instanceData.push_back(object.instance);
     }
+
 
     void mainLoop() {
         while (!glfwWindowShouldClose(window)) {
@@ -219,19 +236,18 @@ private:
         depthImageView.destroy(device);
         depthImage.destroy(device);
 
-        textureImageView.destroy(device);
-        textureSampler.destroy(device);
-        cubeMap.destroy(device);
+
+        textureManager.destroy(device);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             uniformBuffers[i].destroy(device);
         }
         vkDestroyDescriptorPool(device.device, descriptorPool.descriptorPool, nullptr);
-        vkDestroyDescriptorSetLayout(device.device, descriptorSetLayout.descriptorSetLayout, nullptr);
 
-        indexBuffer.destroy(device);
-        vertexBuffer.destroy(device);
-        instanceBuffer.destroy(device);
+        vkDestroyDescriptorSetLayout(device.device, descriptorSetLayout.descriptorSetLayout, nullptr);
+        vkDestroyDescriptorSetLayout(device.device, globalDescriptorSetLayout.descriptorSetLayout, nullptr);
+
+        batchManager.destroy(device);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             vkDestroySemaphore(device.device, syncObjects.renderFinishedSemaphores[i], nullptr);
@@ -269,7 +285,7 @@ private:
             vkDestroyFramebuffer(device.device, framebuffer, nullptr);
         }
 
-        for (auto imageView : swapChainImageViews) {
+        for (auto &imageView : swapChainImageViews) {
             vkDestroyImageView(device.device, imageView.textureImageView, nullptr);
         }
 
@@ -310,6 +326,10 @@ private:
             fps = 0;
         }
 
+        // calculate delta
+        float currentFrameTime = glfwGetTime();
+        deltaTime = currentFrameTime - lastFrame;
+        lastFrame = currentFrameTime;
 
         vkWaitForFences(device.device, 1, &syncObjects.inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
@@ -330,9 +350,20 @@ private:
 
 
         vkResetCommandBuffer(commandBuffers.commandBuffers[currentFrame], 0);
-        recordCommandBuffer(commandBuffers.commandBuffers[currentFrame], imageIndex);
 
-        camera.update(window);
+        batches = Batch::createBatches(objectList, instanceData);
+        recordCommandBuffer(commandBuffers.commandBuffers[currentFrame], batches, imageIndex);
+
+        camera.update(window, deltaTime);
+
+        /*float speed = 1 * deltaTime;
+        for (int i = 0; i < objectList.size(); i++) {
+            BasicObject& object = objectList[i];
+            object.updatePosition(
+                glm::vec3(object.worldPosition.x, object.worldPosition.y + speed, object.worldPosition.z)
+            );
+            instanceData[i] = object.instance;
+        }*/
 
         UniformBufferObject ubo{};
         ubo.view = camera.getViewMatrix();
@@ -377,7 +408,7 @@ private:
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-    void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
+    void recordCommandBuffer(VkCommandBuffer commandBuffer, std::vector<Batch> batches, uint32_t imageIndex) {
         VkCommandBufferBeginInfo beginInfo = VulkanCommandBufferUtil::beginCommandBuffer(commandBuffer, 0);
 
         VkRenderPassBeginInfo renderPassInfo{};
@@ -412,16 +443,33 @@ private:
         scissor.extent = swapChain.swapChainExtent;
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-        VkBuffer vertexBuffers[] = { vertexBuffer.buffer };
-        VkBuffer instanceBuffers[] = { instanceBuffer.buffer };
-        VkDeviceSize offsets[1] = { 0 };
+        //vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.pipelineLayout, 0, 1, &descriptorSets.globalDescriptorSets[currentFrame], 0, nullptr);
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.pipelineLayout, 0, 1, &descriptorSets.globalDescriptorSets[currentFrame], 0, nullptr);
+        batchManager.update(batches);
+        while (!batchManager.batchesComplete) {
 
-        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
-        vkCmdBindVertexBuffers(commandBuffer, 1, 1, &instanceBuffer.buffer, offsets);
-        vkCmdBindIndexBuffer(commandBuffer, indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT16);
+            batchManager.nextBatch(physicalDevice, device, commandPool, modelManager);
 
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.pipelineLayout, 0, 1, &descriptorSets.descriptorSets[currentFrame], 0, nullptr);
-        vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(CubeObject::cubeIndices.size()), MAX_OBJECTS, 0, 0, 0);
+            Batch& batch = batchManager.batches[batchManager.currentBatch];
+            Model& model = modelManager.getModel(batch.modelName);
+            // std::cout << batch.textureName << "\n";
+
+            VkBuffer vertexBuffers[] = { batchManager.getVertexBuf().buffer};
+            VkBuffer instanceBuffers[] = { batchManager.getInstanceBuf().buffer};
+            VkDeviceSize offsets[1] = { 0 };
+
+            vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.pipelineLayout, 1, 1, &descriptorSets.descriptorSets[batch.textureName], 0, nullptr);
+
+            vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+            vkCmdBindVertexBuffers(commandBuffer, 1, 1, instanceBuffers, offsets);
+            vkCmdBindIndexBuffer(commandBuffer, batchManager.getIndexBuf().buffer, 0, VK_INDEX_TYPE_UINT32);
+
+            //std::cout << batch.instanceData.size();
+            vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(model.indices.size()), batch.instanceData.size(), 0, 0, 0);
+            //vkCmdDraw(commandBuffer, model.vertices.size(), batch.instanceData.size(), 0, 0);
+
+            batchManager.finishBatch();
+        }
 
         vkCmdEndRenderPass(commandBuffer);
 

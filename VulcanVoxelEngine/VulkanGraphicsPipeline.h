@@ -15,7 +15,7 @@ public:
 
 	VulkanGraphicsPipeline();
 
-	VulkanGraphicsPipeline(VulkanLogicalDevice device, VulkanRenderPass renderPass, VulkanDescriptorSetLayout descriptorSetLayout);
+	VulkanGraphicsPipeline(VulkanLogicalDevice device, VulkanRenderPass renderPass, std::vector<VkDescriptorSetLayout> descriptorSetLayouts);
 private:
 	std::vector<char> readFile(const std::string& filename);
 	VkShaderModule createShaderModule(VkDevice device, const std::vector<char>& code);
