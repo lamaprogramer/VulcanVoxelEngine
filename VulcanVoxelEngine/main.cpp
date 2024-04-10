@@ -103,7 +103,6 @@ private:
 
     bool framebufferResized = false;
     uint32_t currentFrame = 0;
-    std::vector<Batch> batches;
 
     float deltaTime = 0.0f;	// Time between current frame and last frame
     float lastFrame = 0.0f;
@@ -165,9 +164,9 @@ private:
         commandPool =           VulkanCommandPool(physicalDevice, device, surface);
 
         modelManager = ModelManager();
-        modelManager.addModel("cube", CubeObject::cubeVertices, CubeObject::cubeIndices);
-        modelManager.addModel("cube2", CubeObject::cubeVertices, CubeObject::cubeIndices);
-        modelManager.loadModel("models/viking_room.obj");
+        modelManager.addModel(physicalDevice, device, commandPool, "cube", CubeObject::cubeVertices, CubeObject::cubeIndices);
+        modelManager.addModel(physicalDevice, device, commandPool, "cube2", CubeObject::cubeVertices, CubeObject::cubeIndices);
+        modelManager.loadModel(physicalDevice, device, commandPool, "models/viking_room.obj");
 
         textureManager = TextureManager();
         textureManager.loadCubeTexture(physicalDevice, device, commandPool, "textures/cube.png");
@@ -200,7 +199,7 @@ private:
                     CubeObject object = CubeObject(
                         glm::vec3(x, y, z),
                         "cube2",
-                        "cube"
+                        y < 5 ? "cube" : "viking_room"
                     );
 
                     //objectList[z * 100 + x] = object;
@@ -213,7 +212,7 @@ private:
         CubeObject object = CubeObject(
             glm::vec3(0, 13, 0),
             "viking_room",
-            "cube"
+            "viking_room"
         );
 
         ////objectList[z * 100 + x] = object;
@@ -238,6 +237,7 @@ private:
 
 
         textureManager.destroy(device);
+        modelManager.destroy(device);
 
         for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
             uniformBuffers[i].destroy(device);
@@ -351,8 +351,7 @@ private:
 
         vkResetCommandBuffer(commandBuffers.commandBuffers[currentFrame], 0);
 
-        batches = Batch::createBatches(objectList, instanceData);
-        recordCommandBuffer(commandBuffers.commandBuffers[currentFrame], batches, imageIndex);
+        recordCommandBuffer(commandBuffers.commandBuffers[currentFrame], imageIndex);
 
         camera.update(window, deltaTime);
 
@@ -408,7 +407,7 @@ private:
         currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
     }
 
-    void recordCommandBuffer(VkCommandBuffer commandBuffer, std::vector<Batch> batches, uint32_t imageIndex) {
+    void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {
         VkCommandBufferBeginInfo beginInfo = VulkanCommandBufferUtil::beginCommandBuffer(commandBuffer, 0);
 
         VkRenderPassBeginInfo renderPassInfo{};
@@ -444,17 +443,14 @@ private:
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
         //vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.pipelineLayout, 0, 1, &descriptorSets.globalDescriptorSets[currentFrame], 0, nullptr);
+        batchManager.update(device, Batch::createBatches(objectList, instanceData));
         vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, graphicsPipeline.pipelineLayout, 0, 1, &descriptorSets.globalDescriptorSets[currentFrame], 0, nullptr);
-        batchManager.update(batches);
-        while (!batchManager.batchesComplete) {
+        while (batchManager.hasNext()) {
 
-            batchManager.nextBatch(physicalDevice, device, commandPool, modelManager);
+            Batch batch = batchManager.getBatch();
+            Model model = modelManager.getModel(batch.modelName);
 
-            Batch& batch = batchManager.batches[batchManager.currentBatch];
-            Model& model = modelManager.getModel(batch.modelName);
-            // std::cout << batch.textureName << "\n";
-
-            VkBuffer vertexBuffers[] = { batchManager.getVertexBuf().buffer};
+            VkBuffer vertexBuffers[] = { model.vertexBuffer.buffer};
             VkBuffer instanceBuffers[] = { batchManager.getInstanceBuf().buffer};
             VkDeviceSize offsets[1] = { 0 };
 
@@ -462,15 +458,13 @@ private:
 
             vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
             vkCmdBindVertexBuffers(commandBuffer, 1, 1, instanceBuffers, offsets);
-            vkCmdBindIndexBuffer(commandBuffer, batchManager.getIndexBuf().buffer, 0, VK_INDEX_TYPE_UINT32);
+            vkCmdBindIndexBuffer(commandBuffer, model.indexBuffer.buffer, 0, VK_INDEX_TYPE_UINT32);
 
-            //std::cout << batch.instanceData.size();
-            vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(model.indices.size()), batch.instanceData.size(), 0, 0, 0);
-            //vkCmdDraw(commandBuffer, model.vertices.size(), batch.instanceData.size(), 0, 0);
+            vkCmdDrawIndexed(commandBuffer, static_cast<uint32_t>(model.indices.size()), batch.instanceData.size(), 0, 0, batchManager.getInstanceOffset());
 
             batchManager.finishBatch();
         }
-
+        
         vkCmdEndRenderPass(commandBuffer);
 
         if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS) {

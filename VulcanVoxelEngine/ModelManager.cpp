@@ -4,12 +4,31 @@ ModelManager::ModelManager() {
 
 }
 
-void ModelManager::addModel(std::string name, std::vector<Vertex> vertices, std::vector<uint32_t> indices) {
-	Model model = Model{ vertices, indices };
+void ModelManager::addModel(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, std::string name, std::vector<Vertex> vertices, std::vector<uint32_t> indices) {
+	Model model = Model{};
+    model.vertices = vertices;
+    model.indices = indices;
+
+    model.vertexBuffer = VulkanVertexBuffer(physicalDevice, device, commandPool, sizeof(model.vertices[0]) * model.vertices.size(), VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    model.indexBuffer = VulkanIndexBuffer(physicalDevice, device, commandPool, sizeof(model.indices[0]) * model.indices.size(), VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    model.indexBuffer.updateBuffer(
+        device,
+        model.indices.data(),
+        sizeof(model.indices[0]) * model.indices.size(),
+        0
+    );
+
+    model.vertexBuffer.updateBuffer(
+        device,
+        model.vertices.data(),
+        sizeof(model.vertices[0]) * model.vertices.size(),
+        0
+    );
 	models[name] = model;
 }
 
-void ModelManager::loadModel(std::string modelPath) {
+void ModelManager::loadModel(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, std::string modelPath) {
     Model model = Model{};
 
     tinyobj::attrib_t attrib;
@@ -43,7 +62,31 @@ void ModelManager::loadModel(std::string modelPath) {
         }
     }
 
+    model.vertexBuffer = VulkanVertexBuffer(physicalDevice, device, commandPool, sizeof(model.vertices[0]) * model.vertices.size(), VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+    model.indexBuffer = VulkanIndexBuffer(physicalDevice, device, commandPool, sizeof(model.indices[0]) * model.indices.size(), VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT);
+
+    model.indexBuffer.updateBuffer(
+        device,
+        model.indices.data(),
+        sizeof(model.indices[0]) * model.indices.size(),
+        0
+    );
+
+    model.vertexBuffer.updateBuffer(
+        device,
+        model.vertices.data(),
+        sizeof(model.vertices[0]) * model.vertices.size(),
+        0
+    );
+
     models[getFileName(modelPath)] = model;
+}
+
+void ModelManager::destroy(VulkanLogicalDevice device) {
+    for (auto& [name, model] : models) {
+        model.vertexBuffer.destroy(device);
+        model.indexBuffer.destroy(device);
+    }
 }
 
 std::string ModelManager::getFileName(std::string path) {

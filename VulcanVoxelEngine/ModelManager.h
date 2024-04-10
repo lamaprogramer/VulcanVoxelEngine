@@ -14,9 +14,11 @@ public:
 
 	ModelManager();
 
-	void addModel(std::string name, std::vector<Vertex> vertices, std::vector<uint32_t> indices);
-	void loadModel(std::string modelPath);
+	void addModel(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, std::string name, std::vector<Vertex> vertices, std::vector<uint32_t> indices);
+	void loadModel(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, std::string modelPath);
 
 	std::string getFileName(std::string path);
 	Model& getModel(std::string name);
+
+	void destroy(VulkanLogicalDevice device);
 };
