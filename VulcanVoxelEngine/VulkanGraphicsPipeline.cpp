@@ -1,72 +1,80 @@
 #include "VulkanGraphicsPipeline.h"
 
-VulkanGraphicsPipeline::VulkanGraphicsPipeline() {}
-
-VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, VulkanRenderPass renderPass, std::vector<VkDescriptorSetLayout> descriptorSetLayouts) {
-    auto vertShaderCode = readFile("shaders/vert.spv");
-    auto fragShaderCode = readFile("shaders/cube.spv");
-
-    VkShaderModule vertShaderModule = createShaderModule(device.device, vertShaderCode);
-    VkShaderModule fragShaderModule = createShaderModule(device.device, fragShaderCode);
-
-    VkPipelineShaderStageCreateInfo vertShaderStageInfo{};
-    vertShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    vertShaderStageInfo.stage = VK_SHADER_STAGE_VERTEX_BIT;
-    vertShaderStageInfo.module = vertShaderModule;
-    vertShaderStageInfo.pName = "main";
-
-    VkPipelineShaderStageCreateInfo fragShaderStageInfo{};
-    fragShaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    fragShaderStageInfo.stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    fragShaderStageInfo.module = fragShaderModule;
-    fragShaderStageInfo.pName = "main";
-
-    VkPipelineShaderStageCreateInfo shaderStages[] = { vertShaderStageInfo, fragShaderStageInfo };
-
+VulkanGraphicsPipeline::VulkanGraphicsPipeline() {
     std::vector<VkVertexInputBindingDescription> bindingDescription = {
         Vertex::getBindingDescription(),
         Instance::getBindingDescription()
     };
 
-    uint32_t vec4Size = sizeof(glm::vec4);
     std::vector<VkVertexInputAttributeDescription> attributeDescriptions = {
         VulkanVertexInputUtil::createVertexInputAttributeDescription(0, 0, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Vertex::pos)),
         VulkanVertexInputUtil::createVertexInputAttributeDescription(0, 1, VK_FORMAT_R32G32B32_SFLOAT, offsetof(Vertex, Vertex::color)),
         VulkanVertexInputUtil::createVertexInputAttributeDescription(0, 2, VK_FORMAT_R32G32_SFLOAT, offsetof(Vertex, Vertex::texCoord)),
 
         VulkanVertexInputUtil::createVertexInputAttributeDescription(1, 3, VK_FORMAT_R32G32B32A32_SFLOAT, 0),
-        VulkanVertexInputUtil::createVertexInputAttributeDescription(1, 4, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float)*4),
-        VulkanVertexInputUtil::createVertexInputAttributeDescription(1, 5, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float)*8),
-        VulkanVertexInputUtil::createVertexInputAttributeDescription(1, 6, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float)*12),
+        VulkanVertexInputUtil::createVertexInputAttributeDescription(1, 4, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float) * 4),
+        VulkanVertexInputUtil::createVertexInputAttributeDescription(1, 5, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float) * 8),
+        VulkanVertexInputUtil::createVertexInputAttributeDescription(1, 6, VK_FORMAT_R32G32B32A32_SFLOAT, sizeof(float) * 12),
 
     };
 
-    // Vertex input
-    VkPipelineVertexInputStateCreateInfo vertexInputInfo{};
+    this->bindingDescription = bindingDescription;
+    this->attributeDescriptions = attributeDescriptions;
+
     vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
     vertexInputInfo.vertexBindingDescriptionCount = bindingDescription.size();
     vertexInputInfo.pVertexBindingDescriptions = bindingDescription.data(); // Optional
     vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
     vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data(); // Optional
+    vertexInputInfo.pNext = nullptr;
+    vertexInputInfo.flags = 0;
+}
 
-    // Vertex Input assembly
-    VkPipelineInputAssemblyStateCreateInfo inputAssembly{};
+VulkanGraphicsPipeline VulkanGraphicsPipeline::create() {
+    return VulkanGraphicsPipeline{};
+}
+
+VulkanGraphicsPipeline& VulkanGraphicsPipeline::createShader(VulkanLogicalDevice device, std::string stageName, std::string path, VkShaderStageFlagBits stage) {
+    auto shaderCode = readFile(path);
+    VkShaderModule shaderModule = createShaderModule(device.device, shaderCode);
+
+    VkPipelineShaderStageCreateInfo shaderStageInfo{};
+    shaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+    shaderStageInfo.stage = stage;
+    shaderStageInfo.module = shaderModule;
+    shaderStageInfo.pName = stageName.c_str();
+    shaderStageInfo.pNext = nullptr;
+    shaderStageInfo.flags = 0;
+
+    shaderModules.push_back(shaderModule);
+    shaderStages.push_back(shaderStageInfo);
+    return *this;
+}
+
+VulkanGraphicsPipeline& VulkanGraphicsPipeline::createInputAssembly(VkPrimitiveTopology topology, VkBool32 primitiveRestartEnable) {
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    inputAssembly.primitiveRestartEnable = VK_FALSE;
+    inputAssembly.topology = topology;
+    inputAssembly.primitiveRestartEnable = primitiveRestartEnable;
+    inputAssembly.pNext = nullptr;
+    inputAssembly.flags = 0;
 
-    // Rasterization
-    VkPipelineRasterizationStateCreateInfo rasterizer{};
+    return *this;
+}
+
+VulkanGraphicsPipeline& VulkanGraphicsPipeline::createRasterizer(VkPolygonMode polygonMode) {
     rasterizer.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
     rasterizer.depthClampEnable = VK_FALSE;
-    rasterizer.polygonMode = VK_POLYGON_MODE_FILL; // VK_POLYGON_MODE_LINE for wireframe.
+    rasterizer.polygonMode = polygonMode; // VK_POLYGON_MODE_LINE for wireframe.
     rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
     rasterizer.lineWidth = 1.0;
+    rasterizer.pNext = nullptr;
+    rasterizer.flags = 0;
+    return *this;
+}
 
-    // Multisampling
-    VkPipelineMultisampleStateCreateInfo multisampling{};
+VulkanGraphicsPipeline& VulkanGraphicsPipeline::createMultisampler() {
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampling.sampleShadingEnable = VK_FALSE;
     multisampling.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
@@ -74,22 +82,27 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, Vulka
     multisampling.pSampleMask = nullptr; // Optional
     multisampling.alphaToCoverageEnable = VK_FALSE; // Optional
     multisampling.alphaToOneEnable = VK_FALSE; // Optional
+    multisampling.pNext = nullptr;
+    multisampling.flags = 0;
+    return *this;
+}
 
-    // Depth Stencil
-    VkPipelineDepthStencilStateCreateInfo depthStencil{};
+VulkanGraphicsPipeline& VulkanGraphicsPipeline::createDepthStencil() {
     depthStencil.sType = VK_STRUCTURE_TYPE_PIPELINE_DEPTH_STENCIL_STATE_CREATE_INFO;
     depthStencil.depthTestEnable = VK_TRUE;
     depthStencil.depthWriteEnable = VK_TRUE;
     depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
     depthStencil.depthBoundsTestEnable = VK_FALSE;
     depthStencil.stencilTestEnable = VK_FALSE;
+    depthStencil.pNext = nullptr;
+    depthStencil.flags = 0;
+    return *this;
+}
 
-    // Color Blending
-    VkPipelineColorBlendAttachmentState colorBlendAttachment{};
+VulkanGraphicsPipeline& VulkanGraphicsPipeline::createColorBlender() {
     colorBlendAttachment.colorWriteMask = VK_COLOR_COMPONENT_R_BIT | VK_COLOR_COMPONENT_G_BIT | VK_COLOR_COMPONENT_B_BIT | VK_COLOR_COMPONENT_A_BIT;
     colorBlendAttachment.blendEnable = VK_FALSE;
 
-    VkPipelineColorBlendStateCreateInfo colorBlending{};
     colorBlending.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
     colorBlending.logicOpEnable = VK_FALSE;
     colorBlending.logicOp = VK_LOGIC_OP_COPY; // Optional
@@ -99,38 +112,37 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, Vulka
     colorBlending.blendConstants[1] = 0.0f; // Optional
     colorBlending.blendConstants[2] = 0.0f; // Optional
     colorBlending.blendConstants[3] = 0.0f; // Optional
+    colorBlending.pNext = nullptr;
+    colorBlending.flags = 0;
+    return *this;
+}
 
-    // Dynamic state
-    std::vector<VkDynamicState> dynamicStates = {
+VulkanGraphicsPipeline& VulkanGraphicsPipeline::createDynamicStates() {
+    dynamicStates = {
         VK_DYNAMIC_STATE_VIEWPORT,
         VK_DYNAMIC_STATE_SCISSOR
     };
-
-    VkPipelineDynamicStateCreateInfo dynamicState{};
     dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
     dynamicState.pDynamicStates = dynamicStates.data();
+    dynamicState.pNext = nullptr;
+    dynamicState.flags = 0;
 
-    VkPipelineViewportStateCreateInfo viewportState{};
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
     viewportState.viewportCount = 1;
     viewportState.scissorCount = 1;
+    viewportState.pNext = nullptr;
+    viewportState.flags = 0;
 
-    // Push Constant Range
-    //VkPushConstantRange vpcr[1];
-    //vpcr[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
-    //vpcr[0].offset = 0;
-    //vpcr[0].size = sizeof(ModelMatrixObject);
+    return *this;
+}
 
-
-
+VulkanGraphicsPipeline& VulkanGraphicsPipeline::build(VulkanLogicalDevice device, VulkanRenderPass renderPass, std::vector<VkDescriptorSetLayout> descriptorSetLayouts) {
     // Pipeline layout
     VkPipelineLayoutCreateInfo pipelineLayoutInfo{};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = descriptorSetLayouts.size();
     pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
-    //pipelineLayoutInfo.pushConstantRangeCount = 1;
-    ///pipelineLayoutInfo.pPushConstantRanges = vpcr;
 
     if (vkCreatePipelineLayout(device.device, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
@@ -140,7 +152,7 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, Vulka
     VkGraphicsPipelineCreateInfo pipelineInfo{};
     pipelineInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
     pipelineInfo.stageCount = 2;
-    pipelineInfo.pStages = shaderStages;
+    pipelineInfo.pStages = shaderStages.data();
 
     pipelineInfo.pVertexInputState = &vertexInputInfo;
     pipelineInfo.pInputAssemblyState = &inputAssembly;
@@ -159,9 +171,10 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline(VulkanLogicalDevice device, Vulka
     if (vkCreateGraphicsPipelines(device.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
-
-    vkDestroyShaderModule(device.device, fragShaderModule, nullptr);
-    vkDestroyShaderModule(device.device, vertShaderModule, nullptr);
+    for (VkShaderModule& shaderModule : shaderModules) {
+        vkDestroyShaderModule(device.device, shaderModule, nullptr);
+    }
+    return *this;
 }
 
 std::vector<char> VulkanGraphicsPipeline::readFile(const std::string& filename) {

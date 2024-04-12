@@ -4,7 +4,7 @@ TextureManager::TextureManager() {
 
 }
 
-void TextureManager::loadTexture(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, std::string texturePath) {
+void TextureManager::loadTexture(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, VulkanDescriptorPool descriptorPool, VulkanDescriptorSetLayout descriptorSetLayout, std::string texturePath) {
     Texture texture{};
 
     ImageData imageData{};
@@ -14,11 +14,25 @@ void TextureManager::loadTexture(VulkanPhysicalDevice physicalDevice, VulkanLogi
     texture.imageView = VulkanImageView(device, texture.image.image, 1, VK_IMAGE_VIEW_TYPE_2D, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
     texture.sampler = VulkanImageSampler(physicalDevice, device);
 
+    std::vector<VkDescriptorSetLayout> layouts(1, descriptorSetLayout.descriptorSetLayout);
+    allocateDescriptorSets(device, descriptorPool, layouts, texture.descriptor);
+
+    VkDescriptorImageInfo imageInfo{};
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView = texture.imageView.textureImageView;
+    imageInfo.sampler = texture.sampler.textureSampler;
+
+    std::vector<VkWriteDescriptorSet> descriptorWrites = {
+        VulkanDescriptorSet::writeImageDescriptor(texture.descriptor, 0, imageInfo),
+    };
+
+    vkUpdateDescriptorSets(device.device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+
     std::string fileName = getFileName(texturePath);
     textures[fileName] = texture;
 }
 
-void TextureManager::loadCubeTexture(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, std::string texturePath) {
+void TextureManager::loadCubeTexture(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool, VulkanDescriptorPool descriptorPool, VulkanDescriptorSetLayout descriptorSetLayout, std::string texturePath) {
     Texture texture{};
     
     CubeMapData cubeMapData{};
@@ -31,8 +45,34 @@ void TextureManager::loadCubeTexture(VulkanPhysicalDevice physicalDevice, Vulkan
     texture.imageView = VulkanImageView(device, texture.image.image, 6, VK_IMAGE_VIEW_TYPE_CUBE, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT);
     texture.sampler = VulkanImageSampler(physicalDevice, device);
 
+    std::vector<VkDescriptorSetLayout> layouts(1, descriptorSetLayout.descriptorSetLayout);
+    allocateDescriptorSets(device, descriptorPool, layouts, texture.descriptor);
+
+    VkDescriptorImageInfo imageInfo{};
+    imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+    imageInfo.imageView = texture.imageView.textureImageView;
+    imageInfo.sampler = texture.sampler.textureSampler;
+
+    std::vector<VkWriteDescriptorSet> descriptorWrites = {
+        VulkanDescriptorSet::writeImageDescriptor(texture.descriptor, 0, imageInfo),
+    };
+
+    vkUpdateDescriptorSets(device.device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+
     std::string fileName = getFileName(texturePath);
     textures[fileName] = texture;
+}
+
+void TextureManager::allocateDescriptorSets(VulkanLogicalDevice device, VulkanDescriptorPool descriptorPool, std::vector<VkDescriptorSetLayout> layouts, VkDescriptorSet& descriptorSets) {
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = descriptorPool.descriptorPool;
+    allocInfo.descriptorSetCount = 1;
+    allocInfo.pSetLayouts = layouts.data();
+
+    if (vkAllocateDescriptorSets(device.device, &allocInfo, &descriptorSets) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate descriptor sets!");
+    }
 }
 
 std::string TextureManager::getFileName(std::string path) {

@@ -9,20 +9,14 @@ Batch::Batch(std::string modelName, std::string textureName) {
 	this->textureName = textureName;
 }
 
-//void Batch::destroy(VulkanLogicalDevice device) {
-//	indexBuffer.destroy(device);
-//	vertexBuffer.destroy(device);
-//	instanceBuffer.destroy(device);
-//}
-
-std::vector<Batch> Batch::createBatches(std::vector<BasicObject> objects, std::vector<Instance> instanceData) {
+std::vector<Batch> Batch::createBatches(std::vector<BasicObject> objects) {
 	std::vector<Batch> batches{};
 	std::vector<int> uniqueObjectIndexes{};
 
 
 	for (int i = 0; i < objects.size(); i++) {
 		BasicObject currentObject = objects[i];
-		Instance currentInstance = instanceData[i];
+		Instance currentInstance = currentObject.instance;
 
 		bool matchesAny = false;
 		if (!batches.empty()) {

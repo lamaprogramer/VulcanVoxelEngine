@@ -18,6 +18,6 @@ public:
 	//void init(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanCommandPool commandPool);
 	//void destroy(VulkanLogicalDevice device);
 
-	static std::vector<Batch> createBatches(std::vector<BasicObject> objects, std::vector<Instance> instanceData);
+	static std::vector<Batch> createBatches(std::vector<BasicObject> objects);
 	static bool similarObjects(BasicObject &firstObject, BasicObject &secondObject);
 };

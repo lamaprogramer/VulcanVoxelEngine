@@ -58,6 +58,15 @@
     <Filter Include="Source Files\core\managers">
       <UniqueIdentifier>{1803a3b3-686b-4d22-997d-2393ea24eb13}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\core\engine">
+      <UniqueIdentifier>{60614c7f-c732-4016-bd6c-c7f2ac8c27e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\core\engine">
+      <UniqueIdentifier>{b5105e83-2f1b-4f71-a610-fb5302637fa1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\core\physics">
+      <UniqueIdentifier>{ec9bb2ca-903c-43de-8c01-ee9172067504}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -182,6 +191,12 @@
     </ClCompile>
     <ClCompile Include="TextureManager.cpp">
       <Filter>Source Files\core\managers</Filter>
+    </ClCompile>
+    <ClCompile Include="Engine.cpp">
+      <Filter>Source Files\core\engine</Filter>
+    </ClCompile>
+    <ClCompile Include="Physics.cpp">
+      <Filter>Source Files\core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -319,6 +334,12 @@
     </ClInclude>
     <ClInclude Include="Texture.h">
       <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="Engine.h">
+      <Filter>Header Files\core\engine</Filter>
+    </ClInclude>
+    <ClInclude Include="Physics.h">
+      <Filter>Header Files\core\physics</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
