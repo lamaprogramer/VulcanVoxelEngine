@@ -26,8 +26,6 @@ VulkanGraphicsPipeline::VulkanGraphicsPipeline() {
     vertexInputInfo.pVertexBindingDescriptions = bindingDescription.data(); // Optional
     vertexInputInfo.vertexAttributeDescriptionCount = static_cast<uint32_t>(attributeDescriptions.size());
     vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data(); // Optional
-    vertexInputInfo.pNext = nullptr;
-    vertexInputInfo.flags = 0;
 }
 
 VulkanGraphicsPipeline VulkanGraphicsPipeline::create() {
@@ -43,8 +41,7 @@ VulkanGraphicsPipeline& VulkanGraphicsPipeline::createShader(VulkanLogicalDevice
     shaderStageInfo.stage = stage;
     shaderStageInfo.module = shaderModule;
     shaderStageInfo.pName = stageName.c_str();
-    shaderStageInfo.pNext = nullptr;
-    shaderStageInfo.flags = 0;
+
 
     shaderModules.push_back(shaderModule);
     shaderStages.push_back(shaderStageInfo);
@@ -55,8 +52,7 @@ VulkanGraphicsPipeline& VulkanGraphicsPipeline::createInputAssembly(VkPrimitiveT
     inputAssembly.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
     inputAssembly.topology = topology;
     inputAssembly.primitiveRestartEnable = primitiveRestartEnable;
-    inputAssembly.pNext = nullptr;
-    inputAssembly.flags = 0;
+
 
     return *this;
 }
@@ -69,8 +65,6 @@ VulkanGraphicsPipeline& VulkanGraphicsPipeline::createRasterizer(VkPolygonMode p
     rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
     rasterizer.depthBiasEnable = VK_FALSE;
     rasterizer.lineWidth = 1.0;
-    rasterizer.pNext = nullptr;
-    rasterizer.flags = 0;
     return *this;
 }
 
@@ -82,8 +76,7 @@ VulkanGraphicsPipeline& VulkanGraphicsPipeline::createMultisampler() {
     multisampling.pSampleMask = nullptr; // Optional
     multisampling.alphaToCoverageEnable = VK_FALSE; // Optional
     multisampling.alphaToOneEnable = VK_FALSE; // Optional
-    multisampling.pNext = nullptr;
-    multisampling.flags = 0;
+
     return *this;
 }
 
@@ -94,8 +87,6 @@ VulkanGraphicsPipeline& VulkanGraphicsPipeline::createDepthStencil() {
     depthStencil.depthCompareOp = VK_COMPARE_OP_LESS;
     depthStencil.depthBoundsTestEnable = VK_FALSE;
     depthStencil.stencilTestEnable = VK_FALSE;
-    depthStencil.pNext = nullptr;
-    depthStencil.flags = 0;
     return *this;
 }
 
@@ -112,8 +103,7 @@ VulkanGraphicsPipeline& VulkanGraphicsPipeline::createColorBlender() {
     colorBlending.blendConstants[1] = 0.0f; // Optional
     colorBlending.blendConstants[2] = 0.0f; // Optional
     colorBlending.blendConstants[3] = 0.0f; // Optional
-    colorBlending.pNext = nullptr;
-    colorBlending.flags = 0;
+
     return *this;
 }
 
@@ -125,14 +115,10 @@ VulkanGraphicsPipeline& VulkanGraphicsPipeline::createDynamicStates() {
     dynamicState.sType = VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO;
     dynamicState.dynamicStateCount = static_cast<uint32_t>(dynamicStates.size());
     dynamicState.pDynamicStates = dynamicStates.data();
-    dynamicState.pNext = nullptr;
-    dynamicState.flags = 0;
 
     viewportState.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
     viewportState.viewportCount = 1;
     viewportState.scissorCount = 1;
-    viewportState.pNext = nullptr;
-    viewportState.flags = 0;
 
     return *this;
 }
