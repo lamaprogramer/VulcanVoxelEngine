@@ -32,6 +32,7 @@ const bool enableValidationLayers = true;
 
 class Engine {
 public:
+
     virtual void loadResources(ModelManager& modelManager, TextureManager& textureManager) {};
 
     virtual void run() final;

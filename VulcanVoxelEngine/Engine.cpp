@@ -46,7 +46,7 @@ void Engine::initVulkan() {
             VulkanDescriptorSetLayout::createDescriptorSetLayoutBinding(VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT, 0),
         }
     );
-    graphicsPipeline = VulkanGraphicsPipeline::create()
+    graphicsPipeline = VulkanGraphicsPipelineBuilder::create()
         .createShader(device, "main", "shaders/vert.spv", VK_SHADER_STAGE_VERTEX_BIT)
         .createShader(device, "main", "shaders/cube.spv", VK_SHADER_STAGE_FRAGMENT_BIT)
         .createInputAssembly(VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST, VK_FALSE)
