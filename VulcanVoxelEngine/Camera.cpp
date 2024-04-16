@@ -21,60 +21,70 @@ Camera::Camera(GLFWwindow* window, glm::vec3 position, float centerX, float cent
 }
 
 void Camera::update(GLFWwindow* window, float deltaTime) {
-	float cameraSpeed = 10.5f * deltaTime;
+	if (!locked) {
+		float cameraSpeed = 10.5f * deltaTime;
 
-	if (glfwGetKey(window, keybinds.forward) == GLFW_PRESS) {
-		position += cameraSpeed * cameraFront;
-	}
-	if (glfwGetKey(window, keybinds.backward) == GLFW_PRESS) {
-		position -= cameraSpeed * cameraFront;
-	}
-	if (glfwGetKey(window, keybinds.left) == GLFW_PRESS) {
-		position -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-	}
-	if (glfwGetKey(window, keybinds.right) == GLFW_PRESS) {
-		position += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-	}
-	if (glfwGetKey(window, keybinds.up) == GLFW_PRESS) {
-		position += cameraSpeed * cameraUp;
-	}
-	if (glfwGetKey(window, keybinds.down) == GLFW_PRESS) {
-		position -= cameraSpeed * cameraUp;
-	}
+		if (glfwGetKey(window, keybinds.forward) == GLFW_PRESS) {
+			position += cameraSpeed * cameraFront;
+		}
+		if (glfwGetKey(window, keybinds.backward) == GLFW_PRESS) {
+			position -= cameraSpeed * cameraFront;
+		}
+		if (glfwGetKey(window, keybinds.left) == GLFW_PRESS) {
+			position -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		}
+		if (glfwGetKey(window, keybinds.right) == GLFW_PRESS) {
+			position += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+		}
+		if (glfwGetKey(window, keybinds.up) == GLFW_PRESS) {
+			position += cameraSpeed * cameraUp;
+		}
+		if (glfwGetKey(window, keybinds.down) == GLFW_PRESS) {
+			position -= cameraSpeed * cameraUp;
+		}
 
-	double cursorX;
-	double cursorY;
-	glfwGetCursorPos(window, &cursorX, &cursorY);
+		double cursorX;
+		double cursorY;
+		glfwGetCursorPos(window, &cursorX, &cursorY);
 
-	if (firstMouse)
-	{
+		if (firstMouse)
+		{
+			lastX = cursorX;
+			lastY = cursorY;
+			firstMouse = false;
+		}
+
+		float xoffset = cursorX - lastX;
+		float yoffset = lastY - cursorY; // reversed since y-coordinates range from bottom to top
 		lastX = cursorX;
 		lastY = cursorY;
-		firstMouse = false;
+
+		const float sensitivity = 0.1f;
+		xoffset *= sensitivity;
+		yoffset *= sensitivity;
+
+		yaw += xoffset;
+		pitch += yoffset;
+
+		if (pitch > 89.0f) // constraints
+			pitch = 89.0f;
+		if (pitch < -89.0f)
+			pitch = -89.0f;
+
+		glm::vec3 direction;
+		direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		direction.y = sin(glm::radians(pitch));
+		direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		cameraFront = glm::normalize(direction);
 	}
+}
 
-	float xoffset = cursorX - lastX;
-	float yoffset = lastY - cursorY; // reversed since y-coordinates range from bottom to top
-	lastX = cursorX;
-	lastY = cursorY;
+void Camera::setLocked(bool locked) {
+	this->locked = locked;
+}
 
-	const float sensitivity = 0.1f;
-	xoffset *= sensitivity;
-	yoffset *= sensitivity;
-
-	yaw += xoffset;
-	pitch += yoffset;
-
-	if (pitch > 89.0f) // constraints
-		pitch = 89.0f;
-	if (pitch < -89.0f)
-		pitch = -89.0f;
-
-	glm::vec3 direction;
-	direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-	direction.y = sin(glm::radians(pitch));
-	direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-	cameraFront = glm::normalize(direction);
+bool Camera::isLocked() {
+	return this->locked;
 }
 
 glm::vec3 Camera::getPosition() {

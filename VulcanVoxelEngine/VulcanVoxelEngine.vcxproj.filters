@@ -225,6 +225,9 @@
     <ClCompile Include="..\..\..\..\libs\cpp\imgui-1.90.5\backends\imgui_impl_glfw.cpp">
       <Filter>Source Files\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="Keybind.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="VulkanInstance.h">
@@ -391,6 +394,12 @@
     </ClInclude>
     <ClInclude Include="..\..\..\..\libs\cpp\imgui-1.90.5\backends\imgui_impl_glfw.h">
       <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="EngineKeybinds.h">
+      <Filter>Header Files\core\keybinds</Filter>
+    </ClInclude>
+    <ClInclude Include="Keybind.h">
+      <Filter>Header Files\core</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

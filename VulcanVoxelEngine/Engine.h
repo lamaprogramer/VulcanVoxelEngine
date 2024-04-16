@@ -15,6 +15,7 @@
 
 #include "Camera.h"
 #include "CubeObject.h"
+#include "EngineKeybinds.h"
 #include "BatchManager.h"
 
 
@@ -37,11 +38,6 @@ const bool enableValidationLayers = true;
 
 class Engine {
 public:
-
-    virtual void loadResources(ModelManager& modelManager, TextureManager& textureManager) = 0;
-    virtual void loadObjects(std::vector<BasicObject>& objectList) = 0;
-    virtual void update(std::vector<BasicObject>& objectList) = 0;
-
     virtual void run() final;
 protected:
     GLFWwindow* window;
@@ -49,7 +45,7 @@ protected:
     uint32_t minImageCount = 2;
 
     const uint32_t WIDTH = 1600;
-    const uint32_t HEIGHT = 1200;
+    const uint32_t HEIGHT = 900;
     float secondsPassed = 0;
     int fps = 0;
 
@@ -83,6 +79,7 @@ protected:
 
     VkPipelineCache pipelineCache = VK_NULL_HANDLE;
     Camera camera;
+    EngineKeybinds engineKeybinds;
 
     bool framebufferResized = false;
     uint32_t currentFrame = 0;
@@ -93,6 +90,11 @@ protected:
     float lastX = 400, lastY = 300;
 
     std::vector<BasicObject> objectList{};
+
+    virtual void loadResources(ModelManager& modelManager, TextureManager& textureManager) = 0;
+    virtual void loadObjects(std::vector<BasicObject>& objectList) = 0;
+    void loadKeybinds(EngineKeybinds& engineKeybinds);
+    virtual void update(std::vector<BasicObject>& objectList) = 0;
 
 private:
 
@@ -117,6 +119,8 @@ private:
     void recreateSwapChain();
 
     void drawFrame();
+
+    void updateKeybinds();
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
 

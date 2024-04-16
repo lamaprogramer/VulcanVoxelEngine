@@ -8,6 +8,10 @@ void Engine::run() {
     cleanup();
 }
 
+void Engine::loadKeybinds(EngineKeybinds& engineKeybinds) {
+    engineKeybinds.disableCamera = Keybind(GLFW_KEY_F, true);
+}
+
 void Engine::initWindow() {
     glfwInit();
 
@@ -84,6 +88,7 @@ void Engine::initVulkan() {
     commandBuffers = VulkanCommandBuffers(device, commandPool, MAX_FRAMES_IN_FLIGHT);
     syncObjects = VulkanSyncObjects(device, MAX_FRAMES_IN_FLIGHT);
 
+    loadKeybinds(engineKeybinds);
     camera = Camera(window, glm::vec3(4, 1, 4), swapChain.swapChainExtent.width / 2, swapChain.swapChainExtent.height / 2);
 
     loadObjects(objectList);
@@ -248,6 +253,7 @@ void Engine::drawFrame() {
     vkResetCommandBuffer(commandBuffers.commandBuffers[currentFrame], 0);
     recordCommandBuffer(commandBuffers.commandBuffers[currentFrame], imageIndex);
 
+    updateKeybinds();
     camera.update(window, deltaTime);
     update(objectList);
 
@@ -292,6 +298,13 @@ void Engine::drawFrame() {
 
     vkQueuePresentKHR(device.getPresentQueue(), &presentInfo);
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+}
+
+void Engine::updateKeybinds() {
+    engineKeybinds.disableCamera.update(window, [this]() {
+        camera.setLocked(!camera.isLocked());
+        glfwSetInputMode(window, GLFW_CURSOR, camera.isLocked() ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_DISABLED);
+    });
 }
 
 void Engine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex) {

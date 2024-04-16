@@ -158,6 +158,7 @@
     <ClCompile Include="Chunk.cpp" />
     <ClCompile Include="CubeObject.cpp" />
     <ClCompile Include="Engine.cpp" />
+    <ClCompile Include="Keybind.cpp" />
     <ClCompile Include="ModelManager.cpp" />
     <ClCompile Include="Physics.cpp" />
     <ClCompile Include="TextureManager.cpp" />
@@ -212,7 +213,9 @@
     <ClInclude Include="Chunk.h" />
     <ClInclude Include="CubeObject.h" />
     <ClInclude Include="Engine.h" />
+    <ClInclude Include="EngineKeybinds.h" />
     <ClInclude Include="Instance.h" />
+    <ClInclude Include="Keybind.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="ModelManager.h" />
     <ClInclude Include="Physics.h" />

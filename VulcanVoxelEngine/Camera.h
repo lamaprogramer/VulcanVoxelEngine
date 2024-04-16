@@ -16,6 +16,8 @@ public:
 	Camera(GLFWwindow* window, glm::vec3 position, float centerX, float centerY);
 
 	void update(GLFWwindow* window, float deltaTime);
+	void setLocked(bool locked);
+	bool isLocked();
 	glm::mat4 getViewMatrix();
 	glm::vec3 getPosition();
 	glm::vec3 getFront();
@@ -24,6 +26,7 @@ private:
 	CameraKeybinds keybinds;
 	float lastX, lastY;
 	bool firstMouse = true;
+	bool locked = false;
 
 	glm::vec3 position;
 	glm::vec3 cameraFront;
