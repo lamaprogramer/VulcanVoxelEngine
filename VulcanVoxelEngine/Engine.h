@@ -1,5 +1,9 @@
 #pragma once
 
+#include <imgui.h>
+#include <backends/imgui_impl_glfw.h>
+#include <backends/imgui_impl_vulkan.h>
+
 #include "VulkanFrameBuffers.h"
 #include "VulkanGraphicsPipeline.h"
 #include "VulkanCommandBuffers.h"
@@ -12,6 +16,7 @@
 #include "Camera.h"
 #include "CubeObject.h"
 #include "BatchManager.h"
+
 
 const int MAX_FRAMES_IN_FLIGHT = 2;
 
@@ -33,13 +38,18 @@ const bool enableValidationLayers = true;
 class Engine {
 public:
 
-    virtual void loadResources(ModelManager& modelManager, TextureManager& textureManager) {};
+    virtual void loadResources(ModelManager& modelManager, TextureManager& textureManager) = 0;
+    virtual void loadObjects(std::vector<BasicObject>& objectList) = 0;
+    virtual void update(std::vector<BasicObject>& objectList) = 0;
 
     virtual void run() final;
 protected:
     GLFWwindow* window;
-    const uint32_t WIDTH = 800;
-    const uint32_t HEIGHT = 600;
+    ImGui_ImplVulkanH_Window g_MainWindowData;
+    uint32_t minImageCount = 2;
+
+    const uint32_t WIDTH = 1600;
+    const uint32_t HEIGHT = 1200;
     float secondsPassed = 0;
     int fps = 0;
 
@@ -70,6 +80,8 @@ protected:
     VulkanDescriptorSets descriptorSets;
     VulkanCommandBuffers commandBuffers;
     VulkanSyncObjects syncObjects;
+
+    VkPipelineCache pipelineCache = VK_NULL_HANDLE;
     Camera camera;
 
     bool framebufferResized = false;
@@ -79,7 +91,6 @@ protected:
     float lastFrame = 0.0f;
 
     float lastX = 400, lastY = 300;
-
 
     std::vector<BasicObject> objectList{};
 
@@ -92,6 +103,8 @@ private:
     void initWindow();
 
     void initVulkan();
+
+    void initImgui(ImGui_ImplVulkanH_Window* g_MainWindowData);
 
     void mainLoop();
 
@@ -106,4 +119,13 @@ private:
     void drawFrame();
 
     void recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIndex);
+
+    static void check_vk_result(VkResult err)
+    {
+        if (err == 0)
+            return;
+        fprintf(stderr, "[vulkan] Error: VkResult = %d\n", err);
+        if (err < 0)
+            abort();
+    }
 };

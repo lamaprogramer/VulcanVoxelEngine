@@ -11,29 +11,29 @@ VulkanBuffer::VulkanBuffer(VulkanPhysicalDevice physicalDevice, VulkanLogicalDev
     bufferCreateInfo.usage = usage;
     bufferCreateInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateBuffer(device.device, &bufferCreateInfo, nullptr, &buffer) != VK_SUCCESS) {
+    if (vkCreateBuffer(device.get(), &bufferCreateInfo, nullptr, &buffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to create buffer!");
     }
 
     VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(device.device, buffer, &memRequirements);
+    vkGetBufferMemoryRequirements(device.get(), buffer, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = findMemoryType(physicalDevice, memRequirements.memoryTypeBits, properties);
 
-    if (vkAllocateMemory(device.device, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+    if (vkAllocateMemory(device.get(), &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate buffer memory!");
     }
 
     bufferInfo = createDescriptorBufferInfo(VK_WHOLE_SIZE);
-    vkBindBufferMemory(device.device, buffer, bufferMemory, 0);
+    vkBindBufferMemory(device.get(), buffer, bufferMemory, 0);
 }
 
 void VulkanBuffer::destroy(VulkanLogicalDevice device) {
-    vkDestroyBuffer(device.device, buffer, nullptr);
-    vkFreeMemory(device.device, bufferMemory, nullptr);
+    vkDestroyBuffer(device.get(), buffer, nullptr);
+    vkFreeMemory(device.get(), bufferMemory, nullptr);
 }
 
 VkDescriptorBufferInfo VulkanBuffer::createDescriptorBufferInfo(size_t range = VK_WHOLE_SIZE) {
@@ -57,9 +57,9 @@ void VulkanBuffer::updateBufferWithStaging(VulkanPhysicalDevice physicalDevice, 
 
 
     void* data;
-    vkMapMemory(device.device, stagingBuffer.bufferMemory, 0, dataSize, 0, &data);
+    vkMapMemory(device.get(), stagingBuffer.bufferMemory, 0, dataSize, 0, &data);
     memcpy(data, bufferData, (size_t)dataSize);
-    vkUnmapMemory(device.device, stagingBuffer.bufferMemory);
+    vkUnmapMemory(device.get(), stagingBuffer.bufferMemory);
 
     copyBuffer(device, commandPool, stagingBuffer.buffer, buffer, offset, dataSize);
     stagingBuffer.destroy(device);
@@ -74,9 +74,9 @@ void VulkanBuffer::updateBufferWithStaging(VulkanPhysicalDevice physicalDevice, 
 }
 
 void VulkanBuffer::updateBuffer(VulkanLogicalDevice device, void* bufferData, VkDeviceSize dataSize, VkDeviceSize offset) {
-    vkMapMemory(device.device, bufferMemory, offset, dataSize, 0, &bufferMapped);
+    vkMapMemory(device.get(), bufferMemory, offset, dataSize, 0, &bufferMapped);
     memcpy(bufferMapped, bufferData, dataSize);
-    vkUnmapMemory(device.device, bufferMemory);
+    vkUnmapMemory(device.get(), bufferMemory);
 
     if (offset + dataSize > bufferOffset) {
         bufferOffset += dataSize;
@@ -85,7 +85,7 @@ void VulkanBuffer::updateBuffer(VulkanLogicalDevice device, void* bufferData, Vk
 
 uint32_t VulkanBuffer::findMemoryType(VulkanPhysicalDevice physicalDevice, uint32_t typeFilter, VkMemoryPropertyFlags properties) {
     VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(physicalDevice.physicalDevice, &memProperties);
+    vkGetPhysicalDeviceMemoryProperties(physicalDevice.get(), &memProperties);
 
     for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
         if ((typeFilter & (1 << i)) && (memProperties.memoryTypes[i].propertyFlags & properties) == properties) {

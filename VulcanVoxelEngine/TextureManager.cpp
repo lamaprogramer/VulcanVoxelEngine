@@ -26,7 +26,7 @@ void TextureManager::loadTexture(VulkanPhysicalDevice physicalDevice, VulkanLogi
         VulkanDescriptorSet::writeImageDescriptor(texture.descriptor, 0, imageInfo),
     };
 
-    vkUpdateDescriptorSets(device.device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+    vkUpdateDescriptorSets(device.get(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 
     std::string fileName = getFileName(texturePath);
     textures[fileName] = texture;
@@ -57,7 +57,7 @@ void TextureManager::loadCubeTexture(VulkanPhysicalDevice physicalDevice, Vulkan
         VulkanDescriptorSet::writeImageDescriptor(texture.descriptor, 0, imageInfo),
     };
 
-    vkUpdateDescriptorSets(device.device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+    vkUpdateDescriptorSets(device.get(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 
     std::string fileName = getFileName(texturePath);
     textures[fileName] = texture;
@@ -70,7 +70,7 @@ void TextureManager::allocateDescriptorSets(VulkanLogicalDevice device, VulkanDe
     allocInfo.descriptorSetCount = 1;
     allocInfo.pSetLayouts = layouts.data();
 
-    if (vkAllocateDescriptorSets(device.device, &allocInfo, &descriptorSets) != VK_SUCCESS) {
+    if (vkAllocateDescriptorSets(device.get(), &allocInfo, &descriptorSets) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate descriptor sets!");
     }
 }

@@ -51,7 +51,7 @@ VulkanRenderPass::VulkanRenderPass(VulkanPhysicalDevice physicalDevice, VulkanLo
     renderPassInfo.subpassCount = 1;
     renderPassInfo.pSubpasses = &subpass;
   
-    if (vkCreateRenderPass(device.device, &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+    if (vkCreateRenderPass(device.get(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");
     }
 

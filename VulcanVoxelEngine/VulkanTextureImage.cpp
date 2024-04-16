@@ -25,9 +25,9 @@ VulkanTextureImage::VulkanTextureImage(VulkanPhysicalDevice physicalDevice, Vulk
     );
 
     void* data;
-    vkMapMemory(device.device, stagingBuffer.bufferMemory, 0, imageSize, 0, &data);
+    vkMapMemory(device.get(), stagingBuffer.bufferMemory, 0, imageSize, 0, &data);
     memcpy(data, imageData.pixels, static_cast<size_t>(imageSize));
-    vkUnmapMemory(device.device, stagingBuffer.bufferMemory);
+    vkUnmapMemory(device.get(), stagingBuffer.bufferMemory);
     stbi_image_free(imageData.pixels); // Free the image memory
 
     transitionImageLayout(
@@ -51,6 +51,6 @@ VulkanTextureImage::VulkanTextureImage(VulkanPhysicalDevice physicalDevice, Vulk
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
     );
 
-    vkDestroyBuffer(device.device, stagingBuffer.buffer, nullptr);
-    vkFreeMemory(device.device, stagingBuffer.bufferMemory, nullptr);
+    vkDestroyBuffer(device.get(), stagingBuffer.buffer, nullptr);
+    vkFreeMemory(device.get(), stagingBuffer.bufferMemory, nullptr);
 }

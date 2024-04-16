@@ -3,7 +3,7 @@
 VulkanSwapChain::VulkanSwapChain() {}
 
 VulkanSwapChain::VulkanSwapChain(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevice device, VulkanSurface surface, GLFWwindow* window) {
-    SwapChainSupportDetails swapChainSupport = VulkanPhysicalDevice::querySwapChainSupport(physicalDevice.physicalDevice, surface);
+    SwapChainSupportDetails swapChainSupport = VulkanPhysicalDevice::querySwapChainSupport(physicalDevice.get(), surface);
 
     VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
     VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
@@ -25,7 +25,7 @@ VulkanSwapChain::VulkanSwapChain(VulkanPhysicalDevice physicalDevice, VulkanLogi
     createInfo.imageArrayLayers = 1;
     createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-    QueueFamilyIndices indices = VulkanPhysicalDevice::findQueueFamilies(physicalDevice.physicalDevice, surface);
+    QueueFamilyIndices indices = VulkanPhysicalDevice::findQueueFamilies(physicalDevice.get(), surface);
     uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
     if (indices.graphicsFamily != indices.presentFamily) {
@@ -45,13 +45,13 @@ VulkanSwapChain::VulkanSwapChain(VulkanPhysicalDevice physicalDevice, VulkanLogi
     createInfo.clipped = VK_TRUE;
     createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-    if (vkCreateSwapchainKHR(device.device, &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
+    if (vkCreateSwapchainKHR(device.get(), &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
         throw std::runtime_error("failed to create swap chain!");
     }
 
-    vkGetSwapchainImagesKHR(device.device, swapChain, &imageCount, nullptr);
+    vkGetSwapchainImagesKHR(device.get(), swapChain, &imageCount, nullptr);
     swapChainImages.resize(imageCount);
-    vkGetSwapchainImagesKHR(device.device, swapChain, &imageCount, swapChainImages.data());
+    vkGetSwapchainImagesKHR(device.get(), swapChain, &imageCount, swapChainImages.data());
 
     swapChainImageFormat = surfaceFormat.format;
     swapChainExtent = extent;

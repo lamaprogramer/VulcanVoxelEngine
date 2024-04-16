@@ -5,14 +5,14 @@ VulkanPhysicalDevice::VulkanPhysicalDevice() {}
 
 VulkanPhysicalDevice::VulkanPhysicalDevice(VulkanInstance instance, VulkanSurface surface, std::vector<const char*> deviceExtensions) {
     uint32_t deviceCount = 0;
-    vkEnumeratePhysicalDevices(instance.instance, &deviceCount, nullptr);
+    vkEnumeratePhysicalDevices(instance.get(), &deviceCount, nullptr);
 
     if (deviceCount == 0) {
         throw std::runtime_error("failed to find GPUs with Vulkan support!");
     }
 
     std::vector<VkPhysicalDevice> devices(deviceCount);
-    vkEnumeratePhysicalDevices(instance.instance, &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(instance.get(), &deviceCount, devices.data());
 
     for (const auto& device : devices) {
         if (isDeviceSuitable(device, surface, deviceExtensions)) {
@@ -24,6 +24,10 @@ VulkanPhysicalDevice::VulkanPhysicalDevice(VulkanInstance instance, VulkanSurfac
     if (physicalDevice == VK_NULL_HANDLE) {
         throw std::runtime_error("failed to find a suitable GPU!");
     }
+}
+
+VkPhysicalDevice& VulkanPhysicalDevice::get() {
+    return physicalDevice;
 }
 
 bool VulkanPhysicalDevice::isDeviceSuitable(VkPhysicalDevice device, VulkanSurface surface, std::vector<const char*> deviceExtensions) {
@@ -56,4 +60,53 @@ bool VulkanPhysicalDevice::checkDeviceExtensionSupport(VkPhysicalDevice device, 
     }
 
     return requiredExtensions.empty();
+}
+
+SwapChainSupportDetails VulkanPhysicalDevice::querySwapChainSupport(VkPhysicalDevice device, VulkanSurface surface) {
+    SwapChainSupportDetails details;
+
+    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, surface.surface, &details.capabilities);
+
+    uint32_t formatCount;
+    vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface.surface, &formatCount, nullptr);
+
+    if (formatCount != 0) {
+        details.formats.resize(formatCount);
+        vkGetPhysicalDeviceSurfaceFormatsKHR(device, surface.surface, &formatCount, details.formats.data());
+    }
+
+    uint32_t presentModeCount;
+    vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface.surface, &presentModeCount, nullptr);
+
+    if (presentModeCount != 0) {
+        details.presentModes.resize(presentModeCount);
+        vkGetPhysicalDeviceSurfacePresentModesKHR(device, surface.surface, &presentModeCount, details.presentModes.data());
+    }
+
+    return details;
+}
+
+QueueFamilyIndices VulkanPhysicalDevice::findQueueFamilies(VkPhysicalDevice device, VulkanSurface surface) {
+    QueueFamilyIndices indices;
+
+    uint32_t queueFamilyCount = 0;
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
+
+    std::vector<VkQueueFamilyProperties> queueFamilies(queueFamilyCount);
+    vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, queueFamilies.data());
+
+    int i = 0;
+    for (const auto& queueFamily : queueFamilies) {
+        if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT) {
+            VkBool32 presentSupport = false;
+            vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface.surface, &presentSupport);
+            if (presentSupport) {
+                indices.presentFamily = i;
+            }
+            indices.graphicsFamily = i;
+        }
+
+        i++;
+    }
+    return indices;
 }

@@ -19,23 +19,23 @@ VulkanImage::VulkanImage(VulkanPhysicalDevice physicalDevice, VulkanLogicalDevic
     imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
     imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    if (vkCreateImage(device.device, &imageInfo, nullptr, &image) != VK_SUCCESS) {
+    if (vkCreateImage(device.get(), &imageInfo, nullptr, &image) != VK_SUCCESS) {
         throw std::runtime_error("failed to create image!");
     }
 
     VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(device.device, image, &memRequirements);
+    vkGetImageMemoryRequirements(device.get(), image, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = VulkanBuffer::findMemoryType(physicalDevice, memRequirements.memoryTypeBits, properties);
 
-    if (vkAllocateMemory(device.device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
+    if (vkAllocateMemory(device.get(), &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate image memory!");
     }
 
-    vkBindImageMemory(device.device, image, imageMemory, 0);
+    vkBindImageMemory(device.get(), image, imageMemory, 0);
 }
 
 void VulkanImage::transitionImageLayout(VulkanLogicalDevice device, VulkanCommandPool commandPool, VkImage image, VkFormat format, uint32_t layerCount, VkImageLayout oldLayout, VkImageLayout newLayout) {
@@ -90,8 +90,8 @@ void VulkanImage::transitionImageLayout(VulkanLogicalDevice device, VulkanComman
 }
 
 void VulkanImage::destroy(VulkanLogicalDevice device) {
-    vkFreeMemory(device.device, imageMemory, nullptr);
-    vkDestroyImage(device.device, image, nullptr);
+    vkFreeMemory(device.get(), imageMemory, nullptr);
+    vkDestroyImage(device.get(), image, nullptr);
 }
 
 void VulkanImage::copyBufferToImage(VulkanLogicalDevice device, VulkanCommandPool commandPool, VkBuffer buffer, VkImage image, uint32_t layerCount, uint32_t width, uint32_t height) {

@@ -11,7 +11,7 @@ VulkanDescriptorSets::VulkanDescriptorSets(VulkanLogicalDevice device, std::vect
 			VulkanDescriptorSet::writeUniformBufferDescriptor(globalDescriptorSets[i], 0, uniformBuffers[i].bufferInfo)
 		};
 
-		vkUpdateDescriptorSets(device.device, static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+		vkUpdateDescriptorSets(device.get(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
 	}
 }
 
@@ -23,7 +23,7 @@ void VulkanDescriptorSets::allocateDescriptorSets(VulkanLogicalDevice device, Vu
 	allocInfo.pSetLayouts = layouts.data();
 
 	descriptorSets.resize(descriptorCount);
-	if (vkAllocateDescriptorSets(device.device, &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
+	if (vkAllocateDescriptorSets(device.get(), &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
 		throw std::runtime_error("failed to allocate descriptor sets!");
 	}
 }

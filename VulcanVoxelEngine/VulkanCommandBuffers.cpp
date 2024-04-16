@@ -10,7 +10,7 @@ VulkanCommandBuffers::VulkanCommandBuffers(VulkanLogicalDevice device, VulkanCom
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
     allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
-    if (vkAllocateCommandBuffers(device.device, &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
+    if (vkAllocateCommandBuffers(device.get(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate command buffers!");
     }
 }

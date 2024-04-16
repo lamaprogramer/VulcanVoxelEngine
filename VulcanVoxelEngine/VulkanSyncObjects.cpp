@@ -14,9 +14,9 @@ VulkanSyncObjects::VulkanSyncObjects(VulkanLogicalDevice device, int maxFramesIn
     fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     for (size_t i = 0; i < maxFramesInFlight; i++) {
-        if (vkCreateSemaphore(device.device, &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
-            vkCreateSemaphore(device.device, &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
-            vkCreateFence(device.device, &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
+        if (vkCreateSemaphore(device.get(), &semaphoreInfo, nullptr, &imageAvailableSemaphores[i]) != VK_SUCCESS ||
+            vkCreateSemaphore(device.get(), &semaphoreInfo, nullptr, &renderFinishedSemaphores[i]) != VK_SUCCESS ||
+            vkCreateFence(device.get(), &fenceInfo, nullptr, &inFlightFences[i]) != VK_SUCCESS) {
 
             throw std::runtime_error("failed to create synchronization objects for a frame!");
         }

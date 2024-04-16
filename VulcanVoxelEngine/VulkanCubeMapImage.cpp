@@ -27,11 +27,11 @@ VulkanCubeMapImage::VulkanCubeMapImage(VulkanPhysicalDevice physicalDevice, Vulk
     );
 
     void* data;
-    vkMapMemory(device.device, stagingBuffer.bufferMemory, 0, imageSize, 0, &data);
+    vkMapMemory(device.get(), stagingBuffer.bufferMemory, 0, imageSize, 0, &data);
     for (int i = 0; i < 6; ++i) {
         memcpy(static_cast<char*>(data) + (layerSize * i), cubeMapData.pixels[i], layerSize);
     }
-    vkUnmapMemory(device.device, stagingBuffer.bufferMemory);
+    vkUnmapMemory(device.get(), stagingBuffer.bufferMemory);
     for (int i = 0; i < 6; ++i) {
         stbi_image_free(cubeMapData.pixels[i]); // Free the image memory
     }
@@ -57,6 +57,6 @@ VulkanCubeMapImage::VulkanCubeMapImage(VulkanPhysicalDevice physicalDevice, Vulk
         VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL
     );
 
-    vkDestroyBuffer(device.device, stagingBuffer.buffer, nullptr);
-    vkFreeMemory(device.device, stagingBuffer.bufferMemory, nullptr);
+    vkDestroyBuffer(device.get(), stagingBuffer.buffer, nullptr);
+    vkFreeMemory(device.get(), stagingBuffer.bufferMemory, nullptr);
 }

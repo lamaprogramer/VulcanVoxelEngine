@@ -4,7 +4,7 @@ VulkanLogicalDevice::VulkanLogicalDevice() {}
 
 VulkanLogicalDevice::VulkanLogicalDevice(VulkanPhysicalDevice physicalDevice, VulkanSurface surface, std::vector<const char*> deviceExtensions, 
     std::vector<const char*> validationLayers, bool enableValidationLayers) {
-    QueueFamilyIndices indices = VulkanPhysicalDevice::findQueueFamilies(physicalDevice.physicalDevice, surface);
+    QueueFamilyIndices indices = VulkanPhysicalDevice::findQueueFamilies(physicalDevice.get(), surface);
 
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
     std::set<uint32_t> uniqueQueueFamilies = {
@@ -43,10 +43,22 @@ VulkanLogicalDevice::VulkanLogicalDevice(VulkanPhysicalDevice physicalDevice, Vu
         createInfo.enabledLayerCount = 0;
     }
 
-    if (vkCreateDevice(physicalDevice.physicalDevice, &createInfo, nullptr, &device) != VK_SUCCESS) {
+    if (vkCreateDevice(physicalDevice.get(), &createInfo, nullptr, &device) != VK_SUCCESS) {
         throw std::runtime_error("failed to create logical device!");
     }
 
     vkGetDeviceQueue(device, indices.graphicsFamily.value(), 0, &graphicsQueue);
     vkGetDeviceQueue(device, indices.presentFamily.value(), 0, &presentQueue);
+}
+
+VkDevice& VulkanLogicalDevice::get() {
+    return device;
+}
+
+VkQueue& VulkanLogicalDevice::getGraphicsQueue() {
+    return graphicsQueue;
+}
+
+VkQueue& VulkanLogicalDevice::getPresentQueue() {
+    return presentQueue;
 }

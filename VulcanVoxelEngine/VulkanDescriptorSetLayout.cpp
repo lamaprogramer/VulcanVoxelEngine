@@ -8,7 +8,7 @@ VulkanDescriptorSetLayout::VulkanDescriptorSetLayout(VulkanLogicalDevice device,
     layoutInfo.bindingCount = static_cast<uint32_t>(setLayoutBindings.size());
     layoutInfo.pBindings = setLayoutBindings.data();
 
-    if (vkCreateDescriptorSetLayout(device.device, &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
+    if (vkCreateDescriptorSetLayout(device.get(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor set layout!");
     }
 }

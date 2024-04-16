@@ -14,7 +14,7 @@ VulkanImageSampler::VulkanImageSampler(VulkanPhysicalDevice physicalDevice, Vulk
 	samplerInfo.anisotropyEnable = VK_TRUE;
 
 	VkPhysicalDeviceProperties properties{};
-	vkGetPhysicalDeviceProperties(physicalDevice.physicalDevice, &properties);
+	vkGetPhysicalDeviceProperties(physicalDevice.get(), &properties);
 	samplerInfo.maxAnisotropy = properties.limits.maxSamplerAnisotropy;
 	samplerInfo.borderColor = VK_BORDER_COLOR_INT_OPAQUE_BLACK;
 	samplerInfo.unnormalizedCoordinates = VK_FALSE;
@@ -25,11 +25,11 @@ VulkanImageSampler::VulkanImageSampler(VulkanPhysicalDevice physicalDevice, Vulk
 	samplerInfo.minLod = 0.0f;
 	samplerInfo.maxLod = 0.0f;
 
-	if (vkCreateSampler(device.device, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
+	if (vkCreateSampler(device.get(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create texture sampler!");
 	}
 }
 
 void VulkanImageSampler::destroy(VulkanLogicalDevice device) {
-	vkDestroySampler(device.device, textureSampler, nullptr);
+	vkDestroySampler(device.get(), textureSampler, nullptr);
 }

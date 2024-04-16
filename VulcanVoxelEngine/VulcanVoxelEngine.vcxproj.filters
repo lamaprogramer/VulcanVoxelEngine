@@ -67,6 +67,12 @@
     <Filter Include="Header Files\core\physics">
       <UniqueIdentifier>{ec9bb2ca-903c-43de-8c01-ee9172067504}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\imgui">
+      <UniqueIdentifier>{77a4f1a3-8494-42e1-8651-c616bb435e9f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\imgui">
+      <UniqueIdentifier>{bbf19f6d-e5ba-4de3-8bee-ed4b627875e8}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -197,6 +203,27 @@
     </ClCompile>
     <ClCompile Include="Physics.cpp">
       <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libs\cpp\imgui-1.90.5\imgui_demo.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libs\cpp\imgui-1.90.5\imgui_draw.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libs\cpp\imgui-1.90.5\imgui_tables.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libs\cpp\imgui-1.90.5\imgui_widgets.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libs\cpp\imgui-1.90.5\imgui.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libs\cpp\imgui-1.90.5\backends\imgui_impl_vulkan.cpp">
+      <Filter>Source Files\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\libs\cpp\imgui-1.90.5\backends\imgui_impl_glfw.cpp">
+      <Filter>Source Files\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -340,6 +367,30 @@
     </ClInclude>
     <ClInclude Include="Physics.h">
       <Filter>Header Files\core\physics</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\cpp\imgui-1.90.5\imstb_rectpack.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\cpp\imgui-1.90.5\imstb_textedit.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\cpp\imgui-1.90.5\imstb_truetype.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\cpp\imgui-1.90.5\imconfig.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\cpp\imgui-1.90.5\imgui.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\cpp\imgui-1.90.5\imgui_internal.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\cpp\imgui-1.90.5\backends\imgui_impl_vulkan.h">
+      <Filter>Header Files\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\..\libs\cpp\imgui-1.90.5\backends\imgui_impl_glfw.h">
+      <Filter>Header Files\imgui</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

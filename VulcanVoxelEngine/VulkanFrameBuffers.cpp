@@ -20,7 +20,7 @@ VulkanFrameBuffers::VulkanFrameBuffers(VulkanLogicalDevice device, VulkanSwapCha
         framebufferInfo.height = swapChain.swapChainExtent.height;
         framebufferInfo.layers = 1;
 
-        if (vkCreateFramebuffer(device.device, &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) {
+        if (vkCreateFramebuffer(device.get(), &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create framebuffer!");
         }
     }

@@ -13,10 +13,10 @@ VulkanImageView::VulkanImageView(VulkanLogicalDevice device, VkImage image, uint
 	viewInfo.subresourceRange.baseArrayLayer = 0;
 	viewInfo.subresourceRange.layerCount = layerCount;
 
-	if (vkCreateImageView(device.device, &viewInfo, nullptr, &textureImageView) != VK_SUCCESS) {
+	if (vkCreateImageView(device.get(), &viewInfo, nullptr, &textureImageView) != VK_SUCCESS) {
 		throw std::runtime_error("failed to create texture image view!");
 	}
 }
 void VulkanImageView::destroy(VulkanLogicalDevice device) {
-	vkDestroyImageView(device.device, textureImageView, nullptr);
+	vkDestroyImageView(device.get(), textureImageView, nullptr);
 }

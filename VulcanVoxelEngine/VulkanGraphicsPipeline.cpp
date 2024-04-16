@@ -31,7 +31,7 @@ VulkanGraphicsPipelineBuilder VulkanGraphicsPipelineBuilder::create() {
 
 VulkanGraphicsPipelineBuilder& VulkanGraphicsPipelineBuilder::createShader(VulkanLogicalDevice device, const char* stageName, std::string path, VkShaderStageFlagBits stage) {
     auto shaderCode = readFile(path);
-    VkShaderModule shaderModule = createShaderModule(device.device, shaderCode);
+    VkShaderModule shaderModule = createShaderModule(device.get(), shaderCode);
 
     VkPipelineShaderStageCreateInfo shaderStageInfo{};
     shaderStageInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -124,7 +124,7 @@ VulkanGraphicsPipeline VulkanGraphicsPipelineBuilder::build(VulkanLogicalDevice 
     pipelineLayoutInfo.setLayoutCount = descriptorSetLayouts.size();
     pipelineLayoutInfo.pSetLayouts = descriptorSetLayouts.data();
 
-    if (vkCreatePipelineLayout(device.device, &pipelineLayoutInfo, nullptr, &graphicsPipeline.pipelineLayout) != VK_SUCCESS) {
+    if (vkCreatePipelineLayout(device.get(), &pipelineLayoutInfo, nullptr, &graphicsPipeline.pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
     }
 
@@ -148,11 +148,11 @@ VulkanGraphicsPipeline VulkanGraphicsPipelineBuilder::build(VulkanLogicalDevice 
     pipelineInfo.renderPass = renderPass.renderPass;
     pipelineInfo.subpass = 0;
 
-    if (vkCreateGraphicsPipelines(device.device, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline.graphicsPipeline) != VK_SUCCESS) {
+    if (vkCreateGraphicsPipelines(device.get(), VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline.graphicsPipeline) != VK_SUCCESS) {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
     for (VkShaderModule& shaderModule : shaderModules) {
-        vkDestroyShaderModule(device.device, shaderModule, nullptr);
+        vkDestroyShaderModule(device.get(), shaderModule, nullptr);
     }
     return graphicsPipeline;
 }

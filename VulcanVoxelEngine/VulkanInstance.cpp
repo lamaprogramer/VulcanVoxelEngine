@@ -6,6 +6,10 @@ VulkanInstance::VulkanInstance() {
     });
 }
 
+VkInstance& VulkanInstance::get() {
+    return instance;
+}
+
 VulkanInstance::VulkanInstance(bool enableValidationLayers, std::vector<const char*> validationLayers) {
     if (enableValidationLayers && !checkValidationLayerSupport(validationLayers)) {
         throw std::runtime_error("validation layers requested, but not available!");

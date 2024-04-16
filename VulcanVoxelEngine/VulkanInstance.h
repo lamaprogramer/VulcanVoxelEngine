@@ -7,7 +7,6 @@
 
 class VulkanInstance {
 public:
-    VkInstance instance;
 
     VulkanInstance();
 
@@ -20,7 +19,11 @@ public:
         createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
         createInfo.pfnUserCallback = debugCallback;
     }
+
+    VkInstance& get();
 private:
+    VkInstance instance;
+
     bool checkValidationLayerSupport(std::vector<const char*> validationLayers);
 
     std::vector<const char*> getRequiredExtensions(bool enableValidationLayers);

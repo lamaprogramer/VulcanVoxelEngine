@@ -8,7 +8,7 @@ VulkanDebugMessenger::VulkanDebugMessenger(VulkanInstance instance, bool enableV
     VkDebugUtilsMessengerCreateInfoEXT createInfo;
     VulkanInstance::populateDebugMessengerCreateInfo(createInfo);
 
-    if (CreateDebugUtilsMessengerEXT(instance.instance, &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
+    if (CreateDebugUtilsMessengerEXT(instance.get(), &createInfo, nullptr, &debugMessenger) != VK_SUCCESS) {
         throw std::runtime_error("failed to set up debug messenger!");
     }
 }

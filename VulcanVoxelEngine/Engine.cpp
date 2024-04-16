@@ -1,9 +1,9 @@
-
 #include "Engine.h"
 
 void Engine::run() {
     initWindow();
     initVulkan();
+    initImgui(&g_MainWindowData);
     mainLoop();
     cleanup();
 }
@@ -65,18 +65,14 @@ void Engine::initVulkan() {
     VkFormat depthFormat = VulkanDepthImage::findDepthFormat(physicalDevice);
     depthImage = VulkanDepthImage(physicalDevice, device, swapChain, depthFormat);
     depthImageView = VulkanImageView(device, depthImage.image, 1, VK_IMAGE_VIEW_TYPE_2D, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT);
-
     swapChainFramebuffers = VulkanFrameBuffers(device, swapChain, swapChainImageViews, depthImageView, renderPass);
     commandPool = VulkanCommandPool(physicalDevice, device, surface);
-
-    descriptorPool = VulkanDescriptorPool(device, MAX_FRAMES_IN_FLIGHT);
+    descriptorPool = VulkanDescriptorPool(device, MAX_FRAMES_IN_FLIGHT*2);
 
     modelManager = ModelManager();
     textureManager = TextureManager();
-    loadResources(modelManager, textureManager);
-
-
     batchManager = BatchManager(physicalDevice, device, commandPool, 1048576 * 40);
+    loadResources(modelManager, textureManager);
 
     uniformBuffers.resize(MAX_FRAMES_IN_FLIGHT);
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
@@ -85,36 +81,33 @@ void Engine::initVulkan() {
     }
 
     descriptorSets = VulkanDescriptorSets(device, uniformBuffers, descriptorPool, globalDescriptorSetLayout, MAX_FRAMES_IN_FLIGHT);
-
-
     commandBuffers = VulkanCommandBuffers(device, commandPool, MAX_FRAMES_IN_FLIGHT);
     syncObjects = VulkanSyncObjects(device, MAX_FRAMES_IN_FLIGHT);
 
     camera = Camera(window, glm::vec3(4, 1, 4), swapChain.swapChainExtent.width / 2, swapChain.swapChainExtent.height / 2);
 
-    for (int y = 0; y < 1; y++) {
-        for (int z = -25; z < 25; z++) {
-            for (int x = -25; x < 25; x++) {
-                CubeObject object = CubeObject(
-                    glm::vec3(x, y, z),
-                    "cube2",
-                    "cube"
-                );
+    loadObjects(objectList);
+}
 
-                objectList.push_back(object);
-            }
-        }
-    }
+void Engine::initImgui(ImGui_ImplVulkanH_Window* imguiWindow) {
+    
+    ImGui::CreateContext();
+    ImGui::GetIO().ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
 
-    CubeObject object = CubeObject(
-        glm::vec3(0, 5, 0),
-        "cube2",
-        "viking_room"
-    );
-
-    object.physics = Physics();
-    object.physics.value().velocity = glm::vec3(1, 0, 1);
-    objectList.push_back(object);
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForVulkan(window, true);
+    ImGui_ImplVulkan_InitInfo init_info = {};
+    init_info.Instance = instance.get();
+    init_info.PhysicalDevice = physicalDevice.get();
+    init_info.Device = device.get();
+    init_info.Queue = device.getGraphicsQueue();
+    init_info.DescriptorPool = descriptorPool.descriptorPool;
+    init_info.RenderPass = renderPass.renderPass;
+    init_info.MinImageCount = MAX_FRAMES_IN_FLIGHT;
+    init_info.ImageCount = MAX_FRAMES_IN_FLIGHT;
+    init_info.MSAASamples = VK_SAMPLE_COUNT_1_BIT;
+    init_info.CheckVkResultFn = check_vk_result;
+    ImGui_ImplVulkan_Init(&init_info);
 }
 
 
@@ -123,15 +116,18 @@ void Engine::mainLoop() {
         glfwPollEvents();
         drawFrame();
     }
-    vkDeviceWaitIdle(device.device);
+    vkDeviceWaitIdle(device.get());
 }
 
 void Engine::cleanup() {
+    ImGui_ImplVulkan_Shutdown();
+    ImGui_ImplGlfw_Shutdown();
+    ImGui::DestroyContext();
+
     cleanupSwapChain();
 
     depthImageView.destroy(device);
     depthImage.destroy(device);
-
 
     textureManager.destroy(device);
     modelManager.destroy(device);
@@ -139,33 +135,33 @@ void Engine::cleanup() {
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         uniformBuffers[i].destroy(device);
     }
-    vkDestroyDescriptorPool(device.device, descriptorPool.descriptorPool, nullptr);
+    vkDestroyDescriptorPool(device.get(), descriptorPool.descriptorPool, nullptr);
 
-    vkDestroyDescriptorSetLayout(device.device, descriptorSetLayout.descriptorSetLayout, nullptr);
-    vkDestroyDescriptorSetLayout(device.device, globalDescriptorSetLayout.descriptorSetLayout, nullptr);
+    vkDestroyDescriptorSetLayout(device.get(), descriptorSetLayout.descriptorSetLayout, nullptr);
+    vkDestroyDescriptorSetLayout(device.get(), globalDescriptorSetLayout.descriptorSetLayout, nullptr);
 
     batchManager.destroy(device);
 
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
-        vkDestroySemaphore(device.device, syncObjects.renderFinishedSemaphores[i], nullptr);
-        vkDestroySemaphore(device.device, syncObjects.imageAvailableSemaphores[i], nullptr);
-        vkDestroyFence(device.device, syncObjects.inFlightFences[i], nullptr);
+        vkDestroySemaphore(device.get(), syncObjects.renderFinishedSemaphores[i], nullptr);
+        vkDestroySemaphore(device.get(), syncObjects.imageAvailableSemaphores[i], nullptr);
+        vkDestroyFence(device.get(), syncObjects.inFlightFences[i], nullptr);
     }
 
-    vkDestroyCommandPool(device.device, commandPool.commandPool, nullptr);
-    vkDestroyRenderPass(device.device, renderPass.renderPass, nullptr);
+    vkDestroyCommandPool(device.get(), commandPool.commandPool, nullptr);
+    vkDestroyRenderPass(device.get(), renderPass.renderPass, nullptr);
 
-    vkDestroyPipeline(device.device, graphicsPipeline.graphicsPipeline, nullptr);
-    vkDestroyPipelineLayout(device.device, graphicsPipeline.pipelineLayout, nullptr);
+    vkDestroyPipeline(device.get(), graphicsPipeline.graphicsPipeline, nullptr);
+    vkDestroyPipelineLayout(device.get(), graphicsPipeline.pipelineLayout, nullptr);
 
-    vkDestroyDevice(device.device, nullptr);
+    vkDestroyDevice(device.get(), nullptr);
 
     if (enableValidationLayers) {
-        VulkanDebugMessenger::DestroyDebugUtilsMessengerEXT(instance.instance, debugMessenger.debugMessenger, nullptr);
+        VulkanDebugMessenger::DestroyDebugUtilsMessengerEXT(instance.get(), debugMessenger.debugMessenger, nullptr);
     }
 
-    vkDestroySurfaceKHR(instance.instance, surface.surface, nullptr);
-    vkDestroyInstance(instance.instance, nullptr);
+    vkDestroySurfaceKHR(instance.get(), surface.surface, nullptr);
+    vkDestroyInstance(instance.get(), nullptr);
 
     glfwDestroyWindow(window);
     glfwTerminate();
@@ -179,14 +175,14 @@ void Engine::framebufferResizeCallback(GLFWwindow* window, int width, int height
 
 void Engine::cleanupSwapChain() {
     for (auto framebuffer : swapChainFramebuffers.swapChainFramebuffers) {
-        vkDestroyFramebuffer(device.device, framebuffer, nullptr);
+        vkDestroyFramebuffer(device.get(), framebuffer, nullptr);
     }
 
     for (auto& imageView : swapChainImageViews) {
-        vkDestroyImageView(device.device, imageView.textureImageView, nullptr);
+        vkDestroyImageView(device.get(), imageView.textureImageView, nullptr);
     }
 
-    vkDestroySwapchainKHR(device.device, swapChain.swapChain, nullptr);
+    vkDestroySwapchainKHR(device.get(), swapChain.swapChain, nullptr);
 }
 
 void Engine::recreateSwapChain() {
@@ -197,7 +193,11 @@ void Engine::recreateSwapChain() {
         glfwWaitEvents();
     }
 
-    vkDeviceWaitIdle(device.device);
+    uint32_t queueFamily = VulkanPhysicalDevice::findQueueFamilies(physicalDevice.get(), surface).graphicsFamily.value();
+    ImGui_ImplVulkan_SetMinImageCount(minImageCount);
+    ImGui_ImplVulkanH_CreateOrResizeWindow(instance.get(), physicalDevice.get(), device.get(), &g_MainWindowData, queueFamily, nullptr, 100, 100, minImageCount);
+
+    vkDeviceWaitIdle(device.get());
     cleanupSwapChain();
 
     swapChain = VulkanSwapChain(physicalDevice, device, surface, window);
@@ -228,10 +228,10 @@ void Engine::drawFrame() {
     deltaTime = currentFrameTime - lastFrame;
     lastFrame = currentFrameTime;
 
-    vkWaitForFences(device.device, 1, &syncObjects.inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+    vkWaitForFences(device.get(), 1, &syncObjects.inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
-    VkResult result = vkAcquireNextImageKHR(device.device, swapChain.swapChain, UINT64_MAX, syncObjects.imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+    VkResult result = vkAcquireNextImageKHR(device.get(), swapChain.swapChain, UINT64_MAX, syncObjects.imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
         framebufferResized = false;
@@ -243,24 +243,13 @@ void Engine::drawFrame() {
     }
 
     // Only reset the fence if we are submitting work
-    vkResetFences(device.device, 1, &syncObjects.inFlightFences[currentFrame]);
-
+    vkResetFences(device.get(), 1, &syncObjects.inFlightFences[currentFrame]);
 
     vkResetCommandBuffer(commandBuffers.commandBuffers[currentFrame], 0);
-
     recordCommandBuffer(commandBuffers.commandBuffers[currentFrame], imageIndex);
 
     camera.update(window, deltaTime);
-
-    //float speed = 1 * deltaTime;
-    for (int i = 0; i < objectList.size(); i++) {
-        BasicObject& object = objectList[i];
-        if (object.physics) {
-            object.updatePosition(
-                object.worldPosition + object.physics.value().update(deltaTime)
-            );
-        }
-    }
+    update(objectList);
 
     UniformBufferObject ubo{};
     ubo.view = camera.getViewMatrix();
@@ -286,7 +275,7 @@ void Engine::drawFrame() {
     submitInfo.signalSemaphoreCount = 1;
     submitInfo.pSignalSemaphores = signalSemaphores;
 
-    if (vkQueueSubmit(device.graphicsQueue, 1, &submitInfo, syncObjects.inFlightFences[currentFrame]) != VK_SUCCESS) {
+    if (vkQueueSubmit(device.getGraphicsQueue(), 1, &submitInfo, syncObjects.inFlightFences[currentFrame]) != VK_SUCCESS) {
         throw std::runtime_error("failed to submit draw command buffer!");
     }
 
@@ -301,7 +290,7 @@ void Engine::drawFrame() {
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
 
-    vkQueuePresentKHR(device.presentQueue, &presentInfo);
+    vkQueuePresentKHR(device.getPresentQueue(), &presentInfo);
     currentFrame = (currentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
 }
 
@@ -363,6 +352,15 @@ void Engine::recordCommandBuffer(VkCommandBuffer commandBuffer, uint32_t imageIn
 
         batchManager.finishBatch();
     }
+
+    ImGui_ImplVulkan_NewFrame();
+    ImGui_ImplGlfw_NewFrame();
+    ImGui::NewFrame();
+
+    ImGui::ShowDemoWindow();
+
+    ImGui::Render();
+    ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(), commandBuffer, 0);
 
     vkCmdEndRenderPass(commandBuffer);
 

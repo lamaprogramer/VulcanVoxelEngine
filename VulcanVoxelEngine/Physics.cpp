@@ -2,7 +2,9 @@
 
 glm::vec3 Physics::update(float deltaTime) {
 	lastVelocity = velocity;
+	lastAcceleration = acceleration;
 
+	acceleration = (velocity - lastVelocity) / deltaTime;
 	return velocity * deltaTime;
 }
 
